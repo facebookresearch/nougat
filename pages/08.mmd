@@ -1,0 +1,28 @@
+duced by beam search tend to be short and generic. Completely random sampling can introduce very unlikely words, which can damage generation as the model has not seen such mistakes at training time. The restriction of sampling from the 10 most likely candidates reduces the risk of these low-probability samples.
+
+For each model, we tune a temperature parameter for the softmax at generation time. To ease human evaluation, we generate stories of 150 words and do not generate unknown word tokens.
+
+For prompt generation, we use a self-attentive GCNN language model trained with the same prompt-side vocabulary as the sequence-to-sequence story generation models. The language model to generate prompts has a validation perplexity of 63.06. Prompt generation is conducted using the top-k random sampling from the 10 most likely candidates, and the prompt is completed when the language model generates the end of prompt token.
+
+### Evaluation
+
+We propose a number of evaluation metrics to quantify the performance of our models. Many commonly used metrics, such as BLEU for ma
+
+\begin{table}
+\begin{tabular}{l c} \hline
+**Model** & **Human** \\  & **Preference** \\ \hline \hline Language model & 32.68\% \\ Hierarchical Model & **67.32\%** \\ \hline \end{tabular}
+\end{table}
+Table 4: Effect of Hierarchical Generation. Human judges prefer stories that were generated hierarchically by first creating a premise and creating a full story based on it with a seq2seq model.
+
+Figure 5: Human accuracy at pairing stories with the prompts used to generate them. People find that our fusion model significantly improves the link between the prompt and generated stories.
+
+\begin{table}
+\begin{tabular}{l c c c} \hline
+**Model** & **\# Parameters (mil)** & **Valid Perplexity** & **Test Perplexity** \\ \hline \hline GCNN LM & 123.4 & 54.50 & 54.79 \\ GCNN + self-attention LM & 126.4 & 51.84 & 51.18 \\ \hline LSTM seq2seq & 110.3 & 46.83 & 46.79 \\ Conv seq2seq & 113.0 & 45.27 & 45.54 \\ Conv seq2seq + self-attention & 134.7 & 37.37 & 37.94 \\ Ensemble: Conv seq2seq + self-attention & 270.3 & 36.63 & 36.93 \\ Fusion: Conv seq2seq + self-attention & 255.4 & **36.08** & **36.56** \\ \hline \end{tabular}
+\end{table}
+Table 3: Perplexity on WritingPrompts. We dramatically improve over standard seq2seq models.
+
+Figure 6: Accuracy of prompt ranking. The fusion model most accurately pairs prompt and stories.
+
+Figure 7: Accuracy on the prompt/story pairing task vs. number of generated stories. Our generative fusion model can produce many stories without degraded performance, while the KNN can only produce a limited number relevant stories.
+

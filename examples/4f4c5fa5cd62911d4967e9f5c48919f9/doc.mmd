@@ -1,0 +1,258 @@
+# Using Bifurcations for Diversity in Differentiable Games
+
+Jonathan Lorraine
+
+Jack Parker-Holder
+
+Paul Vicol
+
+Aldo Pacchiano
+
+Luke Metz
+
+Tal Kachman
+
+Jakob Foerster
+
+###### Abstract
+
+Ridge Rider (RR) is an algorithm for finding diverse solutions to optimization problems by following eigenvectors of the Hessian ("ridges"). RR is designed for conservative gradient systems (i.e. settings involving a single loss function), where it branches at saddles - the only relevant _bifurcation points_. We generalize this idea to non-conservative, multi-agent gradient systems by identifying new types of bifurcation points and proposing a method to follow eigenvectors with complex eigenvalues. We give theoretical motivation for our method - denoted Game Ridge Rider (GRR) - by leveraging machinery from the field of dynamical systems. Finally, we empirically motivate our method by constructing novel toy problems where we can visualize new phenomena and by finding diverse solutions in the iterated prisoners' dilemma, where existing methods often converge to a single solution mode.
+
+Ridge Rider, Non-conservative, Multi-agent gradient systems
+
+## 1 Introduction
+
+In machine learning, optimizing non-convex losses to local minima is critical in a variety of applications. Often, being able to select a _specific type of minimum_ is important such as for policy optimization [1] or to avoid non-transferable features in supervised learning [2, 3].
+
+However, an increasing number of applications require learning in games, generalizing single objective optimization to settings where each agent controls a different subset of parameters to optimize their own objective. Some examples are GANs [4, 5], actor-critic models [5], curriculum learning [6, 7, 8, 9], hyperparameter optimization [10, 11, 12, 13, 14, 15], adversarial examples [16, 17], learning models [18, 19, 20], domain adversarial adaptation [21], neural architecture search [22, 23, 24, 25, 26], multi-agent settings [27] and meta-learning [28, 29, 30].
+
+There are two major challenges with learning in games: first, the learning dynamics can be _unstable_ due to the non-stationarity induced by simultaneously learning agents, e.g. resulting in cycling dynamics rather than convergence. Second, different equilibria can result in vastly different rewards for the different agents. For example, in the iterated prisoners' dilemma (Sec. 4.1), finding solutions that favor cooperation vs selfishness result in higher return for all agents; or in Hanabi, finding solutions that do not arbitrarily break symmetries results in better coordination with humans [31]. Recently, Ridge Rider (RR [32]) provided a general method for finding diverse solutions in single objective optimization, by following _eigenvectors of the Hessian_ with negative eigenvalues. We generalize RR to multi-agent settings, each optimizing their own objective. The relevant generalization of the Hessian - the _game Hessian_ - is not symmetric and thus, in general, has complex eigenvalues (EVals) and eigenvectors (EVecs). This leads to new types of _bifurcation_ points, where small changes in initial parameters lead to very different optimization outcomes.
+
+Our method, Game Ridge Rider (GRR) branches from these novel bifurcation points along the (complex) EVecs to discover diverse solutions in these settings.
+
+Figure 1: We visualize the Game Ridge Rider (GRR) algorithm when branching at different types of bifurcations. We have two eigenvectors and can branch in opposite directions, so we have four paths displayed in different colors. Steps with the eigenvector have magenta boundaries. _Top_: For the small Iterated Prisoner’s Dilemma (IPD) finding then branching at the max entropy saddle allows us to find defect-defect and tit-for-tat solutions. _Bottom_: For the mixed problem of small IPD and matching pennies, branching at the Hopf bifurcation allows us to find both solutions.
+
+
+
+## 2 Background
+
+Appendix Table 2 summarizes our notation. Consider the minimization problem:
+
+\[\mathbf{\theta}^{*}:=\arg\min_{\mathbf{\theta}}\mathcal{L}(\mathbf{\theta}) \tag{1}\]
+
+We denote the gradient of the loss at parameters \(\mathbf{\theta}^{j}\) by \(\mathbf{g}^{j}:=\left.\mathbf{g}(\mathbf{\theta}^{j}):=\left.\nabla_{\mathbf{\theta}}\mathcal{L }(\mathbf{\theta})\right|_{\mathbf{\theta}^{j}}\right.\). We can locally minimize the loss \(\mathcal{L}\) using (stochastic) gradient descent with step size \(\alpha\).
+
+\[\mathbf{\theta}^{j+1}=\mathbf{\theta}^{j}-\alpha\mathbf{g}^{j}\] (SGD)
+
+Due to the potentially non-convex nature of \(\mathcal{L}\), multiple solutions can exist and simply following the gradient will not explore the parameter space.
+
+### Ridge Rider
+
+Ridge Rider (RR) [32] finds diverse solutions in gradient systems for single-objective minimization. RR first finds a saddle point, and then branches the optimization procedure following different directions (or "ridges") given by the EVecs of the Hessian \(\mathcal{H}=\nabla_{\mathbf{\theta}}\mathbf{g}=\nabla_{\mathbf{\theta}}(\nabla_{\mathbf{\theta }}\mathcal{L})\). Full computation of \(\mathcal{H}\)--and its EVecs and EVals--is often prohibitively expensive; however, we can efficiently access a subset of the eigenspaces in libraries with efficient Hessian-vector products \(\mathcal{H}\mathbf{v}=\nabla_{\mathbf{\theta}}((\nabla_{\mathbf{\theta}}\mathcal{L})\mathbf{v})\)[33, 34, 35, 36]. Algorithm 1 summarizes the RR method.
+
+### Optimization in Games
+
+Instead of simply optimizing a single loss, optimization in games involves multiple agents each with a loss functions that potentially depend on other agents. Examples include multiplayer games (e.g. Go [37, 38] and Hanabi [39]), iterated prisoners' dilemma (IPD) [40, 41] and generative adversarial networks (GANs) [4]. For simplicity, we look at \(2\)-player games with players denoted by \(A\) and \(B\). Each player wants to minimize their loss \(\mathcal{L}_{A},\mathcal{L}_{B}\) with their parameters \(\mathbf{\theta}_{A}\in\mathbb{R}^{d_{A}}\), \(\mathbf{\theta}_{B}\in\mathbb{R}^{d_{B}}\)
+
+\[\mathbf{\theta}_{A}^{*}\!\in\!\arg\min_{\mathbf{\theta}_{A}}\!\mathcal{L}_{A}(\mathbf{ \theta}_{A},\mathbf{\theta}_{B}^{*}),\mathbf{\theta}_{B}^{*}\!\in\!\arg\min_{\mathbf{ \theta}_{B}}\!\mathcal{L}_{B}(\mathbf{\theta}_{A}^{*}\!,\!\mathbf{\theta}_{B}) \tag{2}\]
+
+\[\iff\mathbf{\theta}_{A}^{*}\!\in\!\arg\min_{\mathbf{\theta}_{A}}\!\mathcal{L}_{A}^{*} (\mathbf{\theta}_{A}),\mathbf{\theta}_{B}^{*}\!\in\!\arg\min_{\mathbf{\theta}_{B}}\! \mathcal{L}_{B}^{*}(\mathbf{\theta}_{B}) \tag{3}\]
+
+If \(\mathcal{L}_{B}\) and \(\mathcal{L}_{A}\) are differentiable in \(\mathbf{\theta}_{B}\) and \(\mathbf{\theta}_{A}\) we say the game is differentiable. Unfortunately, for a player to do gradient based optimization of their objective we must compute \(\nicefrac{{d\mathcal{L}_{B}^{*}}}{{d\mathbf{\theta}_{B}}}\) which often requires \(\nicefrac{{d\mathbf{\theta}_{A}^{*}}}{{d\mathbf{\theta}_{B}}}\), but \(\mathbf{\theta}_{A}^{*}(\mathbf{\theta}_{B})\) and its Jacobian are typically intractable. There are various algorithms to try to find solutions like Eq. 2, often efficiently approximating \(\nicefrac{{d\mathbf{\theta}_{A}^{*}}}{{d\mathbf{\theta}_{B}}}\) with a method rely on efficient Jacobian-vector products. We overview these in our related work (Appendix A).
+
+One of the most straightforward optimization methods is to find local solutions with simultaneous SGD (SimSGD). This does not take into account \(\nicefrac{{d\mathbf{\theta}_{A}^{*}}}{{d\mathbf{\theta}_{B}}}\) and often fails to converge. Here, \(\mathbf{g}_{A}^{j}:=\left.\mathbf{g}_{A}(\mathbf{\theta}_{A}^{j},\mathbf{\theta}_{B}^{j})\right.\) and \(\mathbf{g}_{B}^{j}:=\left.\mathbf{g}_{B}(\mathbf{\theta}_{A}^{j},\mathbf{\theta}_{B}^{j})\right.\) are estimators for \(\left.\nabla_{\mathbf{\theta}_{A}}\mathcal{L}_{A}\right|_{\mathbf{\theta}_{A}^{j},\mathbf{ \theta}_{B}^{j}}\) and \(\left.\nabla_{\mathbf{\theta}_{B}}\mathcal{L}_{B}\right|_{\mathbf{\theta}_{A}^{j},\mathbf{ \theta}_{B}^{j}}^{j}\)
+
+\[\mathbf{\theta}_{A}^{j+1}=\mathbf{\theta}_{A}^{j}-\alpha\mathbf{g}_{A}^{j},\quad\mathbf{\theta }_{B}^{j+1}=\mathbf{\theta}_{B}^{j}-\alpha\mathbf{g}_{B}^{j}\] (SimSGD)
+
+We simplify notation by using the concatenation of all players parameters (or joint-parameters) \(\mathbf{\omega}:=\left[\mathbf{\theta}_{A},\mathbf{\theta}_{B}\right]\!\in\!\mathbb{R}^{d}\) and the joint-gradient vector field \(\hat{\mathbf{g}}:\mathbb{R}^{d}\rightarrow\mathbb{R}^{d}\), which at the \(j^{th}\) iteration is denoted:
+
+\[\hat{\mathbf{g}}^{j}:=\hat{\mathbf{g}}(\mathbf{\omega}^{j}):=\left[\mathbf{g}_{A}(\mathbf{\omega}^{ j}),\mathbf{g}_{B}(\mathbf{\omega}^{j})\right]=\left[\mathbf{g}_{A}^{j},\mathbf{g}_{B}^{j}\right] \tag{4}\]
+
+We can write the next iterate in (SimSGD) with a fixed-point operator \(\mathbf{F}_{\alpha}\):
+
+\[\mathbf{\omega}^{j+1}\!=\!\mathbf{F}_{\alpha}(\mathbf{\omega}^{j})\!=\!\mathbf{\omega}^{j}- \alpha\hat{\mathbf{g}}^{j} \tag{5}\]
+
+The Jacobian of the fixed point operator \(\mathbf{F}_{\alpha}\) is useful for analysis, including bounding convergence rates near fixed points and finding points where local changes to parameters may cause convergence to qualitatively different solutions. The fixed point operator's Jacobian crucially depends on the Jacobian of our update \(\hat{\mathbf{g}}\). When our update is the gradient, we call this the _game Hessian_ because it generalizes the Hessian:
+
+\[\hat{\mathcal{H}}:=\nabla_{\mathbf{\omega}}\hat{\mathbf{g}}=\begin{bmatrix}\nabla_{\mathbf{ \theta}_{A}}^{2}\mathcal{L}_{A}&\nabla_{\mathbf{\theta}_{A}}\nabla_{\mathbf{\theta}_{B}} \mathcal{L}_{A}\\ \nabla_{\mathbf{\theta}_{B}}\nabla_{\mathbf{\theta}_{A}}\mathcal{L}_{B}^{\top}&\nabla_{ \mathbf{\theta}_{B}}^{2}\mathcal{L}_{B}\end{bmatrix} \tag{6}\]
+
+\[\nabla_{\mathbf{\omega}}\mathbf{F}_{\alpha}(\mathbf{\omega})\!=\!\mathbf{I}-\alpha\hat{\mathcal{H}} \tag{7}\]
+
+For single-objective optimization \(\hat{\mathcal{H}}\) is the Hessian of the loss, which is symmetric and has real EVals yielding parameter updates which form a conservative gradient vector field. However, in games with multiple objectives, \(\hat{\mathcal{H}}\) is not symmetric and can have complex EVals, resulting in updates which form a non-conservative vector field.
+
+### Local Bifurcations and Separatrices
+
+The goal of RR was to obtain a method for finding diverse solutions in minimization. There are multiple ways to try to find solutions with RR, but we focus on finding separatrices --i.e., boundaries between phase space regions with different dynamical behavior. Crossing such boundaries leads to different solutions under our updates flow--and branching over these boundaries. Such a behavior of crossing regions and changing behavior is in fact a local bifurcations and a qualitative change in the behavior of the solutions.
+
+When applying RR in conservative gradient systems, saddle points and their EVecs play a key role in the shape of the phase portraits, which are a geometrical representation of the underlying dynamics. The negative EVecs often align with unstable manifolds that are orthogonal to our separatrices [42], thus giving directions in which we can perturb to find different solutions (Lemma 14.3 [43]). However, in non-conservative systems there are a variety of other local bifurcations [44] besides saddle points [45]. For example, by Thm. 11.2 of [43] if all EVals of have negative real part, except a conjugate non-zero pair of purely imaginary EVals, then a _Hopf bifurcation_ occurs when changing the parameters causing the pair to cross the imaginary axis. A Hopf bifurcation is a critical point where the stability of a system switches resulting in a periodic solution.
+
+
+
+## 3 Our Method: Game Ridge Rider (GRR)
+
+In this section we introduce Game Ridge Rider (GRR), a generalization of Game Ridge Rider for learning in games. RR is not immediately applicable to complex EVals of the Hessian, because we would need to follow the complex EVecs, resulting in complex weights, and we may need to branch at points besides saddles. When the Hessian has real EVals, GRR is equivalent to RR.
+
+Consider the framework for the RR method in Alg 1. We modify the components of GetRidges and EndRide, along with a proposed starting saddle. We also add a method for running different optimizers after branching with Evecs.
+
+**GetRidges** finds which EVals and EVecs we should explore from a given branching point. The EVecs of a matrix are not unique in-general, and may have complex entries for complex EVals. We only want real-valued updates when following our EVecs, so we select the choices with largest real part and norm one--this is the default in PyTorch [35]. For a conjugate pair of complex EVals, this selection of EVecs corresponds to spanning the (real-valued) plane that we would rotate in under repeated matrix multiplication of the EVec. This also specifies the order in which we explore the EVals, which we set to be the most negative EVals first. Note that we can explore in opposite directions along each negative EVec.
+
+**EndRide** is a heuristic that determines how long we follow an EVec. We experiment with stopping after a single step and stopping when the real part of the EVal goes from negative to zero. If we have noisy EVecs estimates, or we are not exactly at a separatrix, we may need to take multiple steps to find different solutions. We can attempt to find Hopf bifurcations by ending and branching when a complex EVals crosses the imaginary axis.
+
+**Optimize** is a method which runs an optimization procedure. In this work we explore following gradients SimSGD or LOLA [27] with user specified optimization parameters.
+
+* like the IPD
+- we heuristically begin at the maximum entropy saddle \(\arg\min_{\boldsymbol{\omega}}|\hat{\boldsymbol{g}}|-\beta H(\pi_{\boldsymbol{ \omega}}(\boldsymbol{a})),\beta>0\) as in [32].
+
+The other components of ChooseFromArchive and UpdateRidge we did not change, but summarize below. See RR [32] for more details on their implementations.
+
+* ex., BFS or DFS
+- by outputting an index to search and the updated archive of optimization branches.
+
+**UpdateRidge** updates the currently followed EVec which potentially changed due to the optimization step.
+
+```
+1:Input:\(\boldsymbol{\omega}^{\text{Saddle}}\), \(\alpha\), ChooseFromArchive, GetRidges,
+2:EndRide, Optimize, UpdateRidge
+3:\(\mathcal{A}=\text{GetRidges}(\boldsymbol{\omega}^{\text{Saddle}})\)# Init. Archive
+4:while Archive \(\mathcal{A}\) non-empty do
+5:\(j,\mathcal{A}=\text{ChooseFromArchive}(\mathcal{A})\)
+6:\((\boldsymbol{\omega}^{j},e_{j},\lambda_{j})=\mathcal{A}_{j}\)
+7:while\(\text{EndRide}(\boldsymbol{\omega}^{j},e_{j},\lambda_{j})\) not \(\text{True}\)do
+8:\(\boldsymbol{\omega}^{i}\leftarrow\boldsymbol{\omega}^{j}-\alpha e_{j}\)# Step along the ridge \(e_{j}\)
+9:\(e_{j},\lambda_{j}=\text{UpdateRidge}(\boldsymbol{\omega}^{j},e_{j},\lambda_{j})\)
+10:\(\boldsymbol{\omega}^{j}=\text{Optimize}(\boldsymbol{\omega}^{j})\)
+11:\(\mathcal{A}=\mathcal{A}\cup\text{GetRidges}(\boldsymbol{\omega}^{j})\)# Add new ridges
+```
+
+**Algorithm 1** Game Ridge Rider (GRR)-red modifications
+
+## 4 Experiments
+
+We investigate using Game Ridge Rider on multi-agent learning problems. First, we make a range of two-dimensional games, allowing us to qualitatively study new phenomena that occur in multi-agent settings. Next, we look at a higher dimensional experiment of learning strategies in the iterated prisoners' dilemma (IPD). Our method is able to find a diverse set of solutions improving on baselines.
+
+### Test Problems
+
+Our test problems described in full detail in Appendix Section B.1 and summarized here. We visualize the strategy space for 2-parameter problems in Appendix Fig. 3.
+
+* i.e., the probability of cooperating at start state or given both agents preceding actions. We interested in two Nash equilibria: Defect-Defect (DD) where agents are selfish (giving a poor reward), and _tit-format_ (TT) where agents initially cooperate, then copy the opponents action (giving a higher reward).
+
+**Small IPD**: A is a 2-parameter simplification of IPD, which allows DD and TT Nash equilibria. This game allows us to visualize some of the optimization difficulties for the full-scale IPD, however, the game Hessian has strictly real EVals unlike the full-scale IPD.
+
+**Matching Pennies**: This is a simplified 2-parameter version of rock-paper scissors. The first player wins if they select the same, while the second player wins if they select different. This game has a Nash equilibrium where each player selects their action with uniform probability. This problem's game Hessian has purely imaginary EVals unlike the small IPD, but only has a single solution and thus is a poor fit for evaluating RR which finds diversity of solutions.
+
+**Mixing Small IPD and Matching Pennies**: This game interpolates between the Small IPD and matching pennies games with an interpolation factor \(\tau\in[0,1]\). If \(\tau=.25\)problem has two solutions - one where both players cooperate and one where both players select actions uniformly, with a Hopf bifurcation separating these.
+
+### Baseline Methods on Toy Problems
+
+Fig. 2 we shows the phase portrait for baseline methods on our _mixed problem_ - i.e, the mixture of small IPD and matching pennies with \(\tau=.25\).
+
+### Visualizing the Spectrum on Toy Problems
+
+In Appendix Fig. 5, we visualize the spectrum with the mixed objective to see where stationary points are, which stationary points are solutions, how desirable solutions are for the players, and where the bifurcation occurs.
+
+### Visualizing the Spectrum on the full IPD
+
+Appendix Fig. 4 shows the spectrum on optimization trajectories for the IPD. During training, complex EVals cross the imaginary axis and the final stationary point has positive a& negative real EVals and complex EVals. **Takeaway**: While optimizing the IPD, we have multiple bifurcation candidates and thus multiple potential branching points for GRR.
+
+### Game Ridge Rider (GRR) on Toy Problems
+
+In Figure 1 we use our method to find diverse solutions on toy problems with different types of bifurcations. The small IPD has a saddle bifurcation, while the mixed problem has a Hopf bifurcation. The mixture has a solution with imaginary EVals, which is unstable when following the gradient - see Figure 2 - so we use LOLA after branching. **Takeaway**: By branching our optimization at a bifurcation and using a method for learning in games, we can find all solutions in both toy problems from a single starting point.
+
+### Game Ridge Rider on the IPD
+
+Here, we use our method on the IPD which is a larger scale problem where existing methods have difficulty finding diverse solutions. IPD has two solution modes: ones where both agents end up defecting and cooperating respectively. Table 4 compares our method to following gradients and LOLA each run with random initializations. We also investigate the importance of starting at the max entropy saddle. **Takeaway**: Our method finds solutions at both loss modes by branching at the top few EVecs, where baseline methods failed to find diverse solutions. Starting at an approximate saddle is critical for our branching to find different solutions.
+
+## 5 Conclusion
+
+In this paper we introduced Game Ridge Rider, an extension of the Ridge Rider algorithm to settings with multiple losses. We showed that in these settings a broader class of bifurcation points needs to be considered and that GRR can indeed discover them in a number of settings. Furthermore, our experimental results showed that GRR obtains a diversity of qualitatively different solutions in multi-agent settings such as iterated prisoner's dilemma. We also provide some theoretical justification for our method by using tools from the dynamical systems literature. Prior work had failed to explore the connection between saddle points in the RR algorithm and the bifurcation points in dynamical systems.
+
+\begin{table}
+\begin{tabular}{l l l l l l l} \hline \hline  & \multicolumn{3}{c}{Player 1 Loss} & \multicolumn{3}{c}{Player 1 Strategy Distribution, [min, max]} \\ \cline{3-7} Search Strategy & \(\mathcal{L}\) [min, max] & \(C_{0}\) & \(C|CC\) & \(C|CD\) & \(C|DC\) & \(C|DD\) \\ \hline Max Entropy Saddle & \([1.000,2.000]\) & \([.001,.999]\) & \([.041,.999]\) & \([.004,0.874]\) & \([.000,0.912]\) & \([.000,.013]\) \\
+20 Random init + grad. & \([1.997,1.998]\) & \([.043,.194]\) & \([.142,.480]\) & \([.041,.143]\) & \([.055,.134]\) & \([.001,.001]\) \\
+20 Random init + LOLA & \([1.000,1.396]\) & \([.000,1.00]\) & \([.093,1.00]\) & \([.000,.966]\) & \([.057,1.00]\) & \([.000,.947]\) \\
+1 Random init + branch & \([2.000,2.000]\) & \([.001,.001]\) & \([.027,.027]\) & \([.003,.003]\) & \([.008,.008]\) & \([.000,.000]\) \\ \hline \hline \end{tabular}
+\end{table}
+Table 1: We compare strategies for finding diverse solutions in the iterated prisoner’s dilemma (IPD). The IPD has two solution modes – i.e., solutions where both agents end up defecting with a loss of \(2\) and where both agents end up cooperating with a loss of \(1\) (like tit-for-tat). We compare just following gradients with SimSGD and LOLA [27] with random (initi)ializations. We look at the impact of starting at a saddle, by branching on the EVecs at a random init. **Takeaway**: Our method finds solutions at both loss modes. Random inits then following the gradient or using LOLA does not find diverse solutions – the gradient often defects, while LOLA often cooperates. If we are not at a stationary point like a saddle, then branching likely does not affect where we converge to.
+
+Figure 2: This shows the phase portrait for two standard optimization algorithms on the mixed small IPD and Matching pennies problem. Following the gradient is shown in red, while LOLA – a method for learning in games – is shown in blue. Following the gradient only finds the solution in the top right, because the center solution has imaginary EVals. LOLA [27] can find either solution. **Takeaway**: The mixture game has a range of phenomena, including a imaginary EVal solution, a real EVal solution and a Hopf bifurcation. We may want to use a method for learning in games, so we can robustly converge to different solutions.
+
+
+
+### Acknowledgements
+
+Resources used in preparing this research were provided, in part, by the Province of Ontario, the Government of Canada through CIFAR, and companies sponsoring the Vector Institute. We would also like to thank C. Daniel Freeman for feedback on this work.
+
+## References
+
+* [1] Antoine Cully, Jeff Clune, Danesh Tarapore, and Jean-Baptiste Mouret. Robots that can adapt like animals. _Nature_, 521(7553):503-507, 2015.
+* [2] Robert Geirhos, Patricia Rubisch, Claudio Michaelis, Matthias Bethge, Felix A Wichmann, and Wieland Brendel. Imagenet-trained cnns are biased towards texture; increasing shape bias improves accuracy and robustness. _arXiv preprint arXiv:1811.12231_, 2018.
+* [3] Robert Geirhos, Jorn-Henrik Jacobsen, Claudio Michaelis, Richard Zemel, Wieland Brendel, Matthias Bethge, and Felix A Wichmann. Shortcut learning in deep neural networks. _Nature Machine Intelligence_, 2(11):665-673, 2020.
+* [4] Ian Goodfellow, Jean Pouget-Abadie, Mehdi Mirza, Bing Xu, David Warde-Farley, Sherjil Ozair, Aaron Courville, and Yoshua Bengio. Generative adversarial nets. In _Advances in Neural Information Processing Systems_, pages 2672-2680, 2014.
+* [5] David Pfau and Oriol Vinyals. Connecting generative adversarial networks and actor-critic methods. _arXiv preprint arXiv:1610.01945_, 2016.
+* [6] Yoshua Bengio, Jerome Louradour, Ronan Collobert, and Jason Weston. Curriculum learning. In _International Conference on Machine Learning (ICML)_, pages 41-48, 2009.
+* [7] Bowen Baker, Ingmar Kanitscheider, Todor Markov, Yi Wu, Glenn Powell, Bob McGrew, and Igor Mordatch. Emergent tool use from multi-agent autocurricula. In _International Conference on Learning Representations_, 2019.
+* [8] David Balduzzi, Marta Garnelo, Yoram Bachrach, Wojciech Czarnecki, Julien Perolat, Max Jaderberg, and Thore Graepel. Open-ended learning in symmetric zero-sum games. In _International Conference on Machine Learning_, pages 434-443. PMLR, 2019.
+* [9] Sainbayar Sukhbaatar, Zeming Lin, Ilya Kostrikov, Gabriel Synnaeve, Arthur Szlam, and Rob Fergus. Intrinsic motivation and automatic curricula via asymmetric self-play. In _International Conference on Learning Representations_, 2018.
+* [10] Justin Domke. Generic methods for optimization-based modeling. In _Artificial Intelligence and Statistics_, pages 318-326, 2012.
+* [11] Dougal Maclaurin, David Duvenaud, and Ryan Adams. Gradient-based hyperparameter optimization through reversible learning. In _International Conference on Machine Learning (ICML)_, pages 2113-2122, 2015.
+* [12] Jonathan Lorraine and David Duvenaud. Stochastic hyperparameter optimization through hypernetworks. _arXiv preprint arXiv:1802.09419_, 2018.
+* [13] Matthew MacKay, Paul Vicol, Jon Lorraine, David Duvenaud, and Roger Grosse. Self-tuning networks: Bilevel optimization of hyperparameters using structured best-response functions. In _International Conference on Learning Representations (ICLR)_, 2019.
+* [14] Aniruddh Raghu, Maithra Raghu, Simon Kornblith, David Duvenaud, and Geoffrey Hinton. Teaching with commentaries. _arXiv preprint arXiv:2011.03037_, 2020.
+* [15] Jonathan Lorraine, Paul Vicol, and David Duvenaud. Optimizing millions of hyperparameters by implicit differentiation. In _International Conference on Artificial Intelligence and Statistics (AISTATS)_, pages 1540-1552, 2020.
+* [16] Avishek Joey Bose, Gauthier Gidel, Hugo Bernard, Andre Cianfone, Pascal Vincent, Simon Lacoste-Julien, and William L Hamilton. Adversarial example games. _arXiv preprint arXiv:2007.00720_, 2020.
+* [17] Xiaoyong Yuan, Pan He, Qile Zhu, and Xiaolin Li. Adversarial examples: Attacks and defenses for deep learning. _IEEE Transactions on Neural Networks and Learning Systems_, 30(9):2805-2824, 2019.
+* [18] Aravind Rajeswaran, Igor Mordatch, and Vikash Kumar. A game theoretic framework for model based reinforcement learning. _arXiv preprint arXiv:2004.07804_, 2020.
+* [19] Pierre-Luc Bacon, Florian Schafer, Clement Gehring, Animashree Anandkumar, and Emma Brunskill. A Lagrangian method for inverse problems in reinforcement learning. _lis.csail.mit.edu/pubs_, 2019.
+* [20] Evgenii Nikishin, Romina Abachi, Rishabh Agarwal, and Pierre-Luc Bacon. Control-oriented model-based reinforcement learning with implicit differentiation. _arXiv preprint arXiv:2106.03273_, 2021.
+* [21] David Acuna, Guojun Zhang, Marc T Law, and Sanja Fidler. f-domain-adversarial learning: Theory and algorithms for unsupervised domain adaptation with neural networks, 2021. URL [https://openreview.net/forum?id=WqXAKcwZtI](https://openreview.net/forum?id=WqXAKcwZtI).
+* [22] Barret Zoph and Quoc V Le. Neural architecture search with reinforcement learning. _arXiv preprint arXiv:1611.01578_, 2016.
+* [23] Esteban Real, Alok Aggarwal, Yanping Huang, and Quoc V Le. Regularized evolution for image classifier architecture search. In _AAAI Conference on Artificial Intelligence_, volume 33, pages 4780-4789, 2019.
+* [24] Hanxiao Liu, Karen Simonyan, and Yiming Yang. DARTS: Differentiable architecture search. In _International Conference on Learning Representations (ICLR)_, 2019.
+* [25] Will Grathwohl, Elliot Creager, Seyed Kamyar Seyed Ghasemipour, and Richard Zemel. Gradient-based optimization of neural network architecture. 2018.
+* [26] George Adam and Jonathan Lorraine. Understanding neural architecture search techniques. _arXiv preprint arXiv:1904.00438_, 2019.
+* [27] Jakob Foerster, Richard Y Chen, Maruan Al-Shedivat, Shimon Whiteson, Pieter Abbeel, and Igor Mordatch. Learning with opponent-learning awareness. In _International Conference on Autonomous Agents and MultiAgent Systems_, pages 122-130, 2018.
+* [28] Mengye Ren, Eleni Triantafillou, Sachin Ravi, Jake Snell, Kevin Swersky, Joshua B Tenenbaum, Hugo Larochelle, and Richard S Zemel. Meta-learning for semi-supervised few-shot classification. _arXiv preprint arXiv:1803.00676_, 2018.
+
+* Rajeswaran et al. [2019] Aravind Rajeswaran, Chelsea Finn, Sham Kakade, and Sergey Levine. Meta-learning with implicit gradients. _arXiv preprint arXiv:1909.04630_, 2019.
+* Ren et al. [2020] Mengye Ren, Eleni Triantafillou, Kuan-Chieh Wang, James Lucas, Jake Snell, Xaq Pitkow, Andreas S Tolias, and Richard Zemel. Flexible few-shot learning with contextual similarity. _arXiv preprint arXiv:2012.05895_, 2020.
+* Hu et al. [2020] Hengyuan Hu, Adam Lerer, Alex Peysakhovich, and Jakob Foerster. "other-play" for zero-shot coordination. In _International Conference on Machine Learning_, pages 4399-4410. PMLR, 2020.
+* Parker-Holder et al. [2020] Jack Parker-Holder, Luke Metz, Cinjon Resnick, Hengyuan Hu, Adam Lerer, Alistair Letcher, Alexander Peysakhovich, Aldo Pacchiano, and Jakob Foerster. Ridge rider: Finding diverse solutions by following eigenvectors of the hessian. In H. Larochelle, M. Ranzato, R. Hadsell, M. F. Balcan, and H. Lin, editors, _Advances in Neural Information Processing Systems_, volume 33, pages 753-765. Curran Associates, Inc., 2020. URL [https://proceedings.neurips.cc/paper/2020/file/08425b881bcde94a38cd258cea331be-Paper.pdf](https://proceedings.neurips.cc/paper/2020/file/08425b881bcde94a38cd258cea331be-Paper.pdf).
+* Pearlmutter [1994] Barak A Pearlmutter. Fast exact multiplication by the hessian. _Neural computation_, 6(1):147-160, 1994.
+* Abadi et al. [2015] Martin Abadi, Ashish Agarwal, Paul Barham, Eugene Brevdo, Zhifeng Chen, Craig Citro, Greg S. Corrado, Andy Davis, Jeffrey Dean, Matthieu Devin, Sanjay Ghemawat, Ian Goodfellow, Andrew Harp, Geoffrey Irving, Michael Isard, Yangqing Jia, Rafal Jozefowicz, Lukasz Kaiser, Manjunath Kudlur, Josh Levenberg, Dandelion Mane, Rajat Monga, Sherry Moore, Derek Murray, Chris Olah, Mike Schuster, Jonathon Shlens, Benoit Steiner, Ilya Sutskever, Kunal Talwar, Paul Tucker, Vincent Vanhoucke, Vijay Vasudevan, Fernanda Viegas, Oriol Vinyals, Pete Warden, Martin Wattenberg, Martin Wicke, Yuan Yu, and Xiaoqiang Zheng. TensorFlow: Large-scale machine learning on heterogeneous systems, 2015. URL [https://www.tensorflow.org/](https://www.tensorflow.org/). Software available from tensorflow.org.
+* Paszke et al. [2017] Adam Paszke, Sam Gross, Soumith Chintala, Gregory Chanan, Edward Yang, Zachary DeVito, Zeming Lin, Alban Desmaison, Luca Antiga, and Adam Lerer. Automatic differentiation in pytorch. 2017.
+* Bradbury et al. [2018] James Bradbury, Roy Frostig, Peter Hawkins, Matthew James Johnson, Chris Leary, Dougal Maclaurin, George Necula, Adam Paszke, Jake VanderPlas, Skye Wanderman-Milne, and Qiao Zhang. JAX: composable transformations of Python-NumPy programs, 2018. URL [http://github.com/google/jax](http://github.com/google/jax).
+* Silver et al. [2016] David Silver, Aja Huang, Chris J Maddison, Arthur Guez, Laurent Sifre, George Van Den Driessche, Julian Schrittwieser, Ioannis Antonoglou, Veda Panneershelvam, Marc Lanctot, et al. Mastering the game of go with deep neural networks and tree search. _nature_, 529(7587):484-489, 2016.
+* Silver et al. [2017] David Silver, Julian Schrittwieser, Karen Simonyan, Ioannis Antonoglou, Aja Huang, Arthur Guez, Thomas Hubert, Lucas Baker, Matthew Lai, Adrian Bolton, et al. Mastering the game of go without human knowledge. _nature_, 550(7676):354-359, 2017.
+* Bard et al. [2020] Nolan Bard, Jakob N Foerster, Sarath Chandar, Neil Burch, Marc Lanctot, H Francis Song, Emilio Parisotto, Vincent Dumoulin, Subhodeep Moitra, Edward Hughes, et al. The hanabi challenge: A new frontier for ai research. _Artificial Intelligence_, 280:103216, 2020.
+* Aumann [1960] Robert J Aumann. Acceptable points in games of perfect information. _Pacific Journal of Mathematics_, 10(2):381-417, 1960.
+* Axelrod and Hamilton [1981] Robert Axelrod and William Donald Hamilton. The evolution of cooperation. _science_, 211(4489):1390-1396, 1981.
+* [24] M Tabor. Chaos and integrability in nonlinear dynamics: An introduction, wileyinterscience. _Chaos and Integrability in Nonlinear Dynamics: An Introduction_, 1989.
+* Hale and Kocak [2012] Jack K Hale and Huseyin Kocak. _Dynamics and bifurcations_, volume 3. Springer Science & Business Media, 2012.
+* Shimada and Nagashima [1979] Ippei Shimada and Tommasa Nagashima. A numerical approach to ergodic problem of dissipative dynamical systems. _Progress of theoretical physics_, 61(6):1605-1616, 1979.
+* Bigoni and Kirillov [2019] Davide Bigoni and Oleg Kirillov. _Dynamic Stability and Bifurcation in Nonconservative Mechanics_. Springer, 2019.
+* Hansen and Salamon [1990] L. K. Hansen and P. Salamon. Neural network ensembles. _IEEE Transactions on Pattern Analysis and Machine Intelligence_, 12(10):993-1001, 1990.
+* 1404, 1999. ISSN 0893-6080. doi: [https://doi.org/10.1016/S0893-6080](https://doi.org/10.1016/S0893-6080)(99)0073-8. URL [http://www.sciencedirect.com/science/article/pii/S0893608099000738](http://www.sciencedirect.com/science/article/pii/S0893608099000738).
+* Sinha et al. [2021] Samarth Sinha, Homanga Bharadhwaj, Anirudh Goyal, Hugo Larochelle, Animesh Garg, and Florian Shkurti. Diversity inducing information bottleneck in model ensembles. _AAAI_, 2021.
+* Ross et al. [2020] Andrew Slavin Ross, Weiwei Pan, Leo A. Celi, and Finale Doshi-Velez. Ensembles of locally independent prediction models. In _The Thirty-Fourth AAAI Conference on Artificial Intelligence, AAAI 2020, The Thirty-Second Innovative Applications of Artificial Intelligence Conference, IAAI 2020, The Tenth AAAI Symposium on Educational Advances in Artificial Intelligence, EAAI 2020, New York, NY, USA, February 7-12, 2020_, pages 5527-5536. AAAI Press, 2020. URL [https://aaai.org/ojs/index.php/AAAI/article/view/6004](https://aaai.org/ojs/index.php/AAAI/article/view/6004).
+* Mariet and Sra [2016] Zelda Mariet and Suvrit Sra. Diversity Networks: Neural Network Compression Using Determinantal Point Processes. In _International Conference on Learning Representations (ICLR)_, May 2016.
+* Pang et al. [2019] Tianyu Pang, Kun Xu, Chao Du, Ning Chen, and Jun Zhu. Improving adversarial robustness via promoting ensemble diversity. In _International Conference on Machine Learning_, pages 4970-4979. PMLR, 2019.
+* Lehman and Stanley [2008] Joel Lehman and Kenneth O. Stanley. Exploiting open-endedness to solve problems through the search for novelty. In _Proceedings of the Eleventh International Conference on Artificial Life (Alife XI_. MIT Press, 2008.
+* Eysenbach et al. [2019] Benjamin Eysenbach, Abhishek Gupta, Julian Ibarz, and Sergey Levine. Diversity is all you need: Learning skills without a reward function. In _International Conference on Learning Representations_, 2019. URL [https://openreview.net/forum?id=SJX63JRqFm](https://openreview.net/forum?id=SJX63JRqFm).
+* Parker-Holder et al. [2020] Jack Parker-Holder, Aldo Pacchiano, Krzysztof Choromanski, and Stephen Roberts. Effective diversity in population-based reinforcement learning. In _Advances in Neural Information Processing Systems 34_, 2020.
+
+* [55] Justin K. Pugh, Lisa B. Soros, and Kenneth O. Stanley. Quality diversity: A new frontier for evolutionary computation. _Frontiers in Robotics and AI_, 3:40, 2016. ISSN 2296-9144. doi: 10.3389/frobt.2016.00040. URL [https://www.frontiersin.org/article/10.3389/frobt.2016.00040](https://www.frontiersin.org/article/10.3389/frobt.2016.00040).
+* [56] Galina M Korpelevich. The extragradient method for finding saddle points and other problems. _Matecon_, 12:747-756, 1976.
+* [57] Waiss Azizian, Ioannis Mitliagkas, Simon Lacoste-Julien, and Gauthier Gidel. A tight and unified analysis of gradient-based methods for a whole spectrum of differentiable games. In _International Conference on Artificial Intelligence and Statistics_, pages 2863-2873. PMLR, 2020.
+* [58] Alexander Rakhlin and Karthik Sridharan. Optimization, learning, and games with predictable sequences. _arXiv preprint arXiv:1311.1869_, 2013.
+* [59] Constantinos Daskalakis, Andrew Ilyas, Vasilis Syrgkanis, and Haoyang Zeng. Training gans with optimism. _arXiv preprint arXiv:1711.00141_, 2017.
+* [60] Gauthier Gidel, Reyhane Askari Hemmat, Mohammad Pezeshki, Remi Le Priol, Gabriel Huang, Simon Lacoste-Julien, and Ioannis Mitliagkas. Negative momentum for improved game dynamics. In _The 22nd International Conference on Artificial Intelligence and Statistics_, pages 1802-1811. PMLR, 2019.
+* [61] Jonathan Lorraine, David Acuna, Paul Vicol, and David Duvenaud. Complex momentum for learning in games. _arXiv preprint arXiv:2102.08431_, 2021.
+* [62] Gauthier Gidel, Hugo Berard, Gaetan Vignoud, Pascal Vincent, and Simon Lacoste-Julien. A variational inequality perspective on generative adversarial networks. In _International Conference on Learning Representations_, 2018.
+* [63] Lars Mescheder, Sebastian Nowozin, and Andreas Geiger. The numerics of gans. _arXiv preprint arXiv:1705.10461_, 2017.
+* [64] Alistair Letcher, David Balduzzi, Sebastien Racaniere, James Martens, Jakob Foerster, Karl Tuyls, and Thore Graepel. Differentiable game mechanics. _The Journal of Machine Learning Research_, 20(1):3032-3071, 2019.
+* [65] Eric V Mazumdar, Michael I Jordan, and S Shankar Sastry. On finding local nash equilibria (and only local nash equilibria) in zero-sum games. _arXiv preprint arXiv:1901.00838_, 2019.
+* [66] Florian Schafer and Anima Anandkumar. Competitive gradient descent. _arXiv preprint arXiv:1905.12103_, 2019.
+* [67] Marta Garnelo, Wojciech Marian Czarnecki, Siqi Liu, Dhruva Tirumala, Junhyuk Oh, Gauthier Gidel, Hado van Hasselt, and David Balduzzi. Pick your battles: Interaction graphs as population-level objectives for strategic diversity. In _Proceedings of the 20th International Conference on Autonomous Agents and MultiAgent Systems_, pages 1501-1503, 2021.
+* [68] Oriol Vinyals, Igor Babuschkin, Wojciech M Czarnecki, Michael Mathieu, Andrew Dudzik, Junyoung Chung, David H Choi, Richard Powell, Timo Ewalds, Petko Georgiev, et al. Grandmaster level in starcraft ii using multi-agent reinforcement learning. _Nature_, 575(7782):350-354, 2019.
+* [69] Yaodong Yang, Ying Wen, Jun Wang, Liheng Chen, Kun Shao, David Mguni, and Weinan Zhang. Multi-agent determinantal q-learning. In _International Conference on Machine Learning_, pages 10757-10766. PMLR, 2020.
+* [70] Andrei Lupu, Hengyuan Hu, and Jakob Foerster. Trajectory diversity for zero-shot coordination. In _Proceedings of the 20th International Conference on Autonomous Agents and MultiAgent Systems_, pages 1593-1595, 2021.

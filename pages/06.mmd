@@ -1,0 +1,21 @@
+time-independent basis-set functions.
+
+\[\Psi\left(q_{1},...,q_{f},t\right)=\sum_{j_{1}=1}^{N_{1}}...\sum_{j_{f}=1}^{N_{f}}C_{ j_{1}...j_{f}}(t)\prod_{\kappa=1}^{f}\chi_{j_{k}}^{\kappa}\left(q_{\kappa}\right) \tag{2.6}\]
+
+Hereby, \(f\) represents the degrees of freedom (DOF), \(C_{j_{1}...j_{f}}(t)\) denotes the time-dependent expansion coefficients and \(N_{\kappa}\) describes the number of basis functions used for representing the \(\kappa\)th DOF. The orthonormal time-independent primitive basis functions are represented by \(\chi_{j_{k}}^{\kappa}\left(q_{\kappa}\right)\) and only the time-dependent expansion coefficients are optimized variationally [31, 32].
+
+The problem with the standard method is the exponential scaling as the number of coefficients increase with \(N^{f}\). Therefore, the standard method is only suited for problems with less than 6 DOFs.
+
+In the multiconfiguration time-dependent Hartree method (MCTDH method) the scaling is softened by introducing a smaller but now time-dependent basis, the so-called single particle functions (SPFs)
+
+\[\left|\varphi_{j_{k}}^{\kappa}\left(q_{\kappa},t\right)\right\rangle=\sum_{i_{ \kappa}=1}^{N_{\kappa}}c_{i_{\kappa}j_{\kappa}}^{\kappa}\left(t\right)\left| \chi_{i_{\kappa}}^{\left(q_{\kappa}\right)}\right\rangle. \tag{2.7}\]
+
+The SPFs are represented as a linear combination of the time-independent primitive basis functions. The ansatz for MCTDH method can now be written as the following:
+
+\[\Psi\left(q_{1},...,q_{f},t\right) =\sum_{j_{1}=1}^{n_{1}}...\sum_{j_{f}=1}^{n_{f}}A_{j_{1}...j_{f}}( t)\prod_{\kappa=1}^{f}\varphi_{j_{k}}^{\kappa}\left(q_{\kappa},t\right) \tag{2.8}\] \[=\sum_{J}A_{J}\Phi_{J}. \tag{2.9}\]
+
+Where \(\Phi_{J}\) describes the \(f\)-dimensional product of the SPFs, the Hartree product. The complex expansion coefficients \(A_{J}\) and the basis functions \(\varphi_{j_{k}}^{\kappa}\left(q_{\kappa},t\right)\) are both time-dependent and optimized variationally [31, 32].
+
+Due to the fact that a two layer scheme was used here (the time-dependent SPFs and the primitive basis), the exponential scaling of the DOFs, as \(n_{k}\), is smaller compared to the one layer method like the standard method.
+
+By now applying the Dirac-Frenckle variational principle to the ansatz (eq. (2.9)), we obtain the respective Equations of Motion and therefore a set of coupled differential
