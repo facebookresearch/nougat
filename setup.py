@@ -40,6 +40,7 @@ setup(
             "result",
         ]
     ),
+    py_modules=["predict","app","train","test"],
     python_requires=">=3.7",
     install_requires=[
         "transformers~=4.25.1",
@@ -49,7 +50,7 @@ setup(
         "datasets[vision]",
         "pytorch-lightning>=1.8.5",
         "nltk",
-        "python-Levenshtein-wheels",
+        "python-Levenshtein",
         "sentencepiece",
         "sconf>=0.2.3",
         "albumentations",

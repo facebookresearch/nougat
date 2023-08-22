@@ -47,13 +47,6 @@ def get_args():
         default=None,
         help="Path to checkpoint directory",
     )
-    parser.add_argument(
-        "--pages",
-        type=int,
-        nargs="+",
-        default=None,
-        help="if only one PDF is processed, which pages? if 2 numbers are given, all in between will be processed.",
-    )
     parser.add_argument("--out", "-o", type=Path, help="Output directory.")
     parser.add_argument("--recompute", action="store_true")
     parser.add_argument("pdf", nargs="+", type=Path, help="PDF(s) to process.")
