@@ -160,4 +160,6 @@ This repository builds on top of the [Donut](https://github.com/clovaai/donut/) 
 
 ## License
 
-Nougat is licensed under CC-BY-NC.
+Nougat codebase is licensed under MIT.
+
+Nougat model weights are licensed under CC-BY-NC.

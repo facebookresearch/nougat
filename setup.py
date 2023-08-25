@@ -33,14 +33,14 @@ setup(
     long_description_content_type="text/markdown",
     author="Lukas Blecher",
     author_email="lblecher@meta.com",
-    url="https://github.com/facebookresearch/donut",
+    url="https://github.com/facebookresearch/nougat",
     license="MIT",
     packages=find_packages(
         exclude=[
             "result",
         ]
     ),
-    py_modules=["predict","app","train","test"],
+    py_modules=["predict", "app", "train", "test"],
     python_requires=">=3.7",
     install_requires=[
         "transformers~=4.25.1",
