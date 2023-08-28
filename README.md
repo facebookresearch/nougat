@@ -1,7 +1,7 @@
 <div align="center">
 <h1>Nougat: Neural Optical Understanding for Academic Documents</h1>
 
-[![Paper](https://img.shields.io/badge/Paper-arxiv.230x.xxxxx-red)](https://arxiv.org/abs/230x.xxxxx)
+[![Paper](https://img.shields.io/badge/Paper-arxiv.2308.13418-white)](https://arxiv.org/abs/2308.13418)
 [![GitHub](https://img.shields.io/github/license/facebookresearch/nougat)](https://github.com/facebookresearch/nougat)
 [![PyPI](https://img.shields.io/pypi/v/nougat-ocr?logo=pypi)](https://pypi.org/project/nougat-ocr)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/release/python-390/)
@@ -143,14 +143,13 @@ python -m nougat.metrics path/to/results.json
 ## Citation
 
 ```
-@misc{blecher_nougat_2023,
-      doi = {10.48550/ARXIV.2303.xxxxx},
-      url = {https://arxiv.org/abs/2303.xxxxx},
-      author = {Blecher, Lukas and Cucurull, Guillem and Scialom, Thomas and Stojnic, Robert},
-      title = {Nougat: Neural Optical Understanding for Academic Documents},
-      publisher = {arXiv},
-      year = {2023},
-      copyright = {arXiv.org perpetual, non-exclusive license}
+@misc{blecher2023nougat,
+      title={Nougat: Neural Optical Understanding for Academic Documents}, 
+      author={Lukas Blecher and Guillem Cucurull and Thomas Scialom and Robert Stojnic},
+      year={2023},
+      eprint={2308.13418},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG}
 }
 ```
 
