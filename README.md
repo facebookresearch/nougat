@@ -86,7 +86,7 @@ Additional arguments include
 | `--recompute`         | recompute all splits                       |
 | `--markdown MARKDOWN` | Markdown output dir                        |
 | `--workers WORKERS`   | How many processes to use                  |
-| `--dpi DPI`           | What resoultion the pages will be saved at |
+| `--dpi DPI`           | What resolution the pages will be saved at |
 | `--timeout TIMEOUT`   | max time per paper in seconds              |
 | `--tesseract`         | Tesseract OCR prediction for each page     |
 
