@@ -283,6 +283,7 @@ class BARTDecoder(nn.Module):
         input_ids: torch.Tensor,
         encoder_outputs: torch.Tensor,
         past=None,
+        past_key_values=None,
         use_cache: bool = None,
         attention_mask: torch.Tensor = None,
     ):
@@ -295,6 +296,7 @@ class BARTDecoder(nn.Module):
             encoder_hidden_states: (batch_size, sequence_length, embedding_dim)
         """
         attention_mask = input_ids.ne(self.tokenizer.pad_token_id).long()
+        past = past or past_key_values
         if past is not None:
             input_ids = input_ids[:, -1:]
         output = {
@@ -591,7 +593,6 @@ class NougatModel(PreTrainedModel):
             encoder_outputs=encoder_outputs,
             min_length=1,
             max_length=self.config.max_length,
-            early_stopping=True,
             pad_token_id=self.decoder.tokenizer.pad_token_id,
             eos_token_id=self.decoder.tokenizer.eos_token_id,
             use_cache=True,
@@ -601,7 +602,6 @@ class NougatModel(PreTrainedModel):
             return_dict_in_generate=True,
             output_scores=True,
             output_attentions=return_attentions,
-            temperature=0,
             do_sample=False,
             stopping_criteria=StoppingCriteriaList([StoppingCriteriaScores()]),
         )

@@ -17,6 +17,7 @@ from tqdm import tqdm
 from nougat import NougatModel
 from nougat.utils.dataset import LazyDataset
 from nougat.utils.checkpoint import get_checkpoint
+from nougat.postprocessing import markdown_compatible
 import fitz
 
 logging.basicConfig(level=logging.INFO)
@@ -49,6 +50,11 @@ def get_args():
     )
     parser.add_argument("--out", "-o", type=Path, help="Output directory.")
     parser.add_argument("--recompute", action="store_true")
+    parser.add_argument(
+        "--markdown",
+        action="store_true",
+        help="Add postprocessing step for markdown compatibility",
+    )
     parser.add_argument("pdf", nargs="+", type=Path, help="PDF(s) to process.")
     args = parser.parse_args()
     if args.checkpoint is None or not args.checkpoint.exists():
@@ -136,6 +142,8 @@ def main():
                         f"\n\n[MISSING_PAGE_EMPTY:{i*args.batchsize+j+1}]\n\n"
                     )
             else:
+                if args.markdown:
+                    output = markdown_compatible(output)
                 predictions.append(output)
             if is_last_page[j]:
                 out = "".join(predictions).strip()

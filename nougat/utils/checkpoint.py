@@ -48,7 +48,8 @@ def download_checkpoint(checkpoint: Path):
     for file in files:
         download_url = f"{BASE_URL}/{MODEL_TAG}/{file}"
         binary_file = download_as_bytes_with_progress(download_url, file)
-        (checkpoint / file).write_bytes(binary_file)
+        if len(binary_file) > 15:  # sanity check
+            (checkpoint / file).write_bytes(binary_file)
 
 
 def get_checkpoint(
