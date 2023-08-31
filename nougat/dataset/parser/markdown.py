@@ -322,6 +322,19 @@ def format_iterator(
     latex_env: bool = False,
     join: Optional[str] = None,
 ) -> List[str]:
+    """
+    The `format_iterator` function takes an iterator and formats its elements, optionally joining them with a specified string.
+
+    :param iterator: The `iterator` parameter is an iterable object that contains the elements to be formatted. It could be a list, tuple, set, or any other iterable object
+    :type iterator: Iterable
+    :param keep_refs: The `keep_refs` parameter is a boolean flag that determines whether references to other elements should be preserved in the formatted output. If `keep_refs` is set to `True`, the references will be included in the output. If `keep_refs` is set to `False` (default), the, defaults to False
+    :type keep_refs: bool (optional)
+    :param latex_env: The `latex_env` parameter is a boolean flag that determines whether the output should be formatted as LaTeX code. If `latex_env` is set to `True`, the output will be formatted using LaTeX syntax. If `latex_env` is set to `False` (default), the output will be, defaults to False
+    :type latex_env: bool (optional)
+    :param join: The `join` parameter is an optional string that specifies the delimiter to be used when joining the formatted elements of the iterator into a single string. If `join` is provided, it will be inserted between each formatted element. If `join` is not provided, the formatted elements will be returned as
+    :type join: Optional[str]
+    :return: The function `format_iterator` returns a list of strings.
+    """
     parts = []
     for child in iterator:
         parts.extend(format_element(child, keep_refs, latex_env))
@@ -343,6 +356,15 @@ def format_children(
 def format_document(
     doc: Document, keep_refs: bool = False
 ) -> Tuple[str, Dict[str, str]]:
+    """
+    The `format_document` function takes a `doc` object of type `Document` and a boolean `keep_refs` as input and returns a tuple containing the formatted text of the document and a dictionary of figures found in the document.
+
+    :param doc: The `doc` parameter is of type `Document`, which is presumably a custom class representing a document
+    :type doc: Document
+    :param keep_refs: The `keep_refs` parameter is a boolean flag that determines whether to keep references in the formatted document or not. If `keep_refs` is set to `True`, the references will be included in the formatted document. If `keep_refs` is set to `False`, the references will be excluded, defaults to False
+    :type keep_refs: bool (optional)
+    :return: The function `format_document` returns a tuple containing two elements: a formatted text document and a dictionary of figures.
+    """
     parts = []
 
     if doc.title:
