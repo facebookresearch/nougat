@@ -106,7 +106,6 @@ async def predict(
     dataloader = torch.utils.data.DataLoader(
         dataset,
         batch_size=BATCHSIZE,
-        num_workers=2,
         pin_memory=True,
         shuffle=False,
     )
