@@ -70,6 +70,17 @@ def root():
 async def predict(
     file: UploadFile = File(...), start: int = None, stop: int = None
 ) -> str:
+    """
+    Perform predictions on a PDF document and return the extracted text in Markdown format.
+
+    Args:
+        file (UploadFile): The uploaded PDF file to process.
+        start (int, optional): The starting page number for prediction.
+        stop (int, optional): The ending page number for prediction.
+
+    Returns:
+        str: The extracted text in Markdown format.
+    """
     pdfbin = file.file.read()
     pdf = fitz.open("pdf", pdfbin)
     md5 = hashlib.md5(pdfbin).hexdigest()

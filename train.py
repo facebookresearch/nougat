@@ -35,10 +35,42 @@ logger.setLevel(logging.INFO)
 
 
 class CustomCheckpointIO(CheckpointIO):
+    """
+    A custom class for saving and loading checkpoints with additional functionality.
+
+    Args:
+        `CheckpointIO` (class): The base class for checkpoint I/O operations.
+
+    Methods:
+        `save_checkpoint(checkpoint, path, storage_options=None)`:
+            Save a checkpoint to the specified path.
+
+        `load_checkpoint(path, storage_options=None)`:
+            Load a checkpoint from the specified path.
+
+        `remove_checkpoint(path) -> None`:
+            Remove a checkpoint from the specified path.
+
+    """
     def save_checkpoint(self, checkpoint, path, storage_options=None):
+        """
+        Save a checkpoint to the specified path.
+
+        Args:
+            `checkpoint` (dict): The dictionary containing the checkpoint data.
+            `path` (str): The path where the checkpoint will be saved.
+            `storage_options` (dict, optional): Additional storage options.
+        """
         torch.save(checkpoint, path)
 
     def load_checkpoint(self, path, storage_options=None):
+        """
+        Load a checkpoint from the specified path.
+
+        Args:
+            `path` (str): The path from which the checkpoint will be loaded.
+            `storage_options` (dict, optional): Additional storage options.
+        """
         path = Path(path)
         if path.is_file():
             print("path:", path, path.is_dir())
@@ -94,6 +126,12 @@ def save_config_file(config, path):
 
 
 def train(config):
+    """
+    Train a Nougat model using the provided configuration.
+
+    Args:
+        `config` (dict): A dictionary containing configuration settings for training.
+    """
     pl.utilities.seed.seed_everything(config.get("seed", 42), workers=True)
 
     model_module = NougatModelPLModule(config)

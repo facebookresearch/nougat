@@ -180,6 +180,18 @@ class Staircase:
         data: np.ndarray,
         labels: np.ndarray,
     ):
+        """
+        Fit statistical thresholds for anomaly detection.
+
+        This method fits statistical thresholds for anomaly detection based on input data and labels.
+
+        Args:
+            data (np.ndarray): The input data.
+            labels (np.ndarray): The labels corresponding to the data.
+
+        Note:
+            This method modifies the internal state of the object to set statistical thresholds.
+        """
         onehot = np.eye(self.classes)[labels.reshape(-1)]
         onehot.reshape(list(labels.shape) + [self.classes])
         k = onehot * data.T.repeat(self.classes, 1)
@@ -206,6 +218,20 @@ class Staircase:
         early_stop_after: int = 10,
         fixed: bool = True,
     ) -> None:
+        """
+        Fit statistical thresholds for anomaly detection.
+
+        This method fits statistical thresholds for anomaly detection based on input data and labels.
+
+        Args:
+            data (np.ndarray): The input data.
+            labels (np.ndarray): The labels corresponding to the data.
+            early_stop_after (int, optional): The number of consecutive early stops to consider. Default is 10.
+            fixed (bool, optional): Whether to use fixed thresholds. Default is True.
+
+        Note:
+            This method modifies the internal state of the object to set statistical thresholds.
+        """
         assert data.ndim == 1
         assert labels.ndim <= 2
         if self.classes == 1:

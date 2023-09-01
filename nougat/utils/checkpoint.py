@@ -65,6 +65,21 @@ def download_checkpoint(checkpoint: Path):
 def get_checkpoint(
     checkpoint_path: Optional[os.PathLike] = None, download: bool = True
 ) -> Path:
+    """
+    Get the path to the Nougat model checkpoint.
+
+    This function retrieves the path to the Nougat model checkpoint. If the checkpoint does not
+    exist or is empty, it can optionally download the checkpoint.
+
+    Args:
+        checkpoint_path (Optional[os.PathLike]): The path to the checkpoint. If not provided,
+            it will check the "NOUGAT_CHECKPOINT" environment variable or use the default location.
+        download (bool): Whether to download the checkpoint if it doesn't exist or is empty.
+            Default is True.
+
+    Returns:
+        Path: The path to the Nougat model checkpoint.
+    """
     checkpoint = Path(
         checkpoint_path
         or os.environ.get("NOUGAT_CHECKPOINT", torch.hub.get_dir() + "/nougat")
