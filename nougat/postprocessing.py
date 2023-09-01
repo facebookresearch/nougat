@@ -30,7 +30,7 @@ def markdown_compatible(s: str) -> str:
         r"\[\1 \\tag{\2}\] \3",
         s,
         flags=re.M,
-    )  # mulit line
+    )  # multi line
     s = s.replace(r"\. ", ". ")
     # bold formatting
     s = s.replace(r"\bm{", r"\mathbf{").replace(r"{\\bm ", r"\mathbf{")
