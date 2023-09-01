@@ -98,6 +98,17 @@ def is_empty(content: List) -> bool:
 def format_element(
     element: Element, keep_refs: bool = False, latex_env: bool = False
 ) -> List[str]:
+    """
+    Formats a given Element into a list of formatted strings.
+
+    Args:
+        element (Element): The element to be formatted.
+        keep_refs (bool, optional): Whether to keep references in the formatting. Default is False.
+        latex_env (bool, optional): Whether to use LaTeX environment formatting. Default is False.
+
+    Returns:
+        List[str]: A list of formatted strings representing the formatted element.
+    """
     if isinstance(element, TextElement):
         if latex_env:
             return [latex_escape(element.content)]

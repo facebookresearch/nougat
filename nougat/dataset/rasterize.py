@@ -20,6 +20,20 @@ def rasterize_paper(
     return_pil=False,
     pages=None,
 ) -> Optional[List[io.BytesIO]]:
+    """
+    Rasterize a PDF file to PNG images.
+
+    Args:
+        pdf (Path): The path to the PDF file.
+        outpath (Optional[Path], optional): The output directory. If None, the PIL images will be returned instead. Defaults to None.
+        dpi (int, optional): The output DPI. Defaults to 96.
+        return_pil (bool, optional): Whether to return the PIL images instead of writing them to disk. Defaults to False.
+        pages (Optional[List[int]], optional): The pages to rasterize. If None, all pages will be rasterized. Defaults to None.
+
+    Returns:
+        Optional[List[io.BytesIO]]: The PIL images if `return_pil` is True, otherwise None.
+    """
+
     pils = []
     if outpath is None:
         return_pil = True

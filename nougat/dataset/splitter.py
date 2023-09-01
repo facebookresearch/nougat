@@ -39,7 +39,19 @@ def get_first_last(
     first_only: bool = False,
     last_only: bool = False,
 ) -> Union[Tuple[str, str], str]:
-    """returns the first and last `num_words` from a string `s`."""
+    """
+    Get the first and last `num_words` from a string `s`.
+
+    Args:
+        s (str): The string.
+        num_words (int): The number of words.
+        delim (str): The delimiter between words.
+        first_only (bool): Whether to only get the first `num_words`.
+        last_only (bool): Whether to only get the last `num_words`.
+
+    Returns:
+        Union[Tuple[str, str], str]: The first and last `num_words` from `s`, or `s` if `num_words` is 0.
+    """
     s = s.split(delim)
     if not first_only and not last_only:
         return delim.join(s[:num_words]), delim.join(s[-num_words:])

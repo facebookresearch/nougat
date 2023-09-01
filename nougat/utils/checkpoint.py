@@ -18,6 +18,16 @@ MODEL_TAG = "0.1.0-small"
 
 # source: https://stackoverflow.com/a/71459251
 def download_as_bytes_with_progress(url: str, name: str = None) -> bytes:
+    """
+    Download a file from a URL and return the contents as bytes, with progress bar.
+
+    Args:
+        url: The URL of the file to download.
+        name: The name of the file to save to. If None, the filename will be the same as the URL.
+
+    Returns:
+        bytes: The contents of the file.
+    """
     resp = requests.get(url, stream=True, allow_redirects=True)
     total = int(resp.headers.get("content-length", 0))
     bio = io.BytesIO()

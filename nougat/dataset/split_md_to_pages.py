@@ -32,6 +32,14 @@ from nougat.dataset.utils import unicode_to_latex, remove_pretty_linebreaks
 
 
 class BagOfWords:
+    """
+    A bag-of-words model for text classification.
+
+    Args:
+        sentences (List[str]): The training sentences.
+        target (Optional[List[int]]): The target labels for the training sentences. Defaults to None.
+
+    """
     def __init__(
         self,
         sentences: List[str],
@@ -72,6 +80,7 @@ class BagOfWords:
 
 
 def remove_short_seqs(seqs: List[str], minimum: int = 10) -> List[str]:
+    """Remove sequences shorter than the specified minimum length."""
     out = []
     for seq in seqs:
         if len(seq) > minimum:
@@ -82,6 +91,18 @@ def remove_short_seqs(seqs: List[str], minimum: int = 10) -> List[str]:
 def find_figures(
     pdf_pages: List[List[str]], figure_info: Union[Dict, List]
 ) -> List[Tuple[int, int]]:
+    """"
+    Find the locations of figures in a PDF file.
+
+    Args:
+        pdf_pages (List[List[str]]): The text of the PDF pages.
+        figure_info (Union[Dict, List]): A dictionary or list of dictionaries, where each dictionary
+            specifies the information about a figure, such as its caption, page number, and bounding box.
+
+    Returns:
+        List[Tuple[int, int]]: A list of tuples, where each tuple contains the figure index, page number,
+            start position, and end position of the figure in the PDF file.
+    """
     figure_locations = []
     iterator = figure_info.values() if type(figure_info) == dict else [figure_info]
     for figure_list in iterator:
@@ -115,6 +136,20 @@ def get_doc_text(
     minlen: Optional[int] = 10,
     return_blocks: bool = True,
 ) -> List[List[str]]:
+    """
+    Get the text from a PDF document.
+
+    Args:
+        doc (fitz.Document): The PDF document.
+        splitn (bool): Whether to split the text into lines. Defaults to True.
+        split_block (bool): Whether to split the text into blocks. Defaults to True.
+        minlen (Optional[int]): The minimum length of a line or block. Defaults to 10.
+        return_blocks (bool): Whether to return the block information. Defaults to True.
+
+    Returns:
+        List[List[str]]: The text of the PDF document, either as a list of lines or a list of blocks.
+        If `return_blocks` is True, a tuple of (text, block_info) is returned.
+    """
     document_lines = []
     block_info = []
     for i, page in enumerate(doc.pages()):
@@ -154,6 +189,16 @@ def get_doc_text(
 
 
 def clean_pdf_text(pages: List[List[str]], num_words: int = 10) -> List[List[str]]:
+    """
+    Clean the text of a PDF document by removing frequent words from the beginning and end of each page.
+
+    Args:
+        pages (List[List[str]]): The text of the PDF document, as a list of lists of strings.
+        num_words (int, optional): The number of words to consider at the beginning and end of each page. Defaults to 10.
+
+    Returns:
+        List[List[str]]: The cleaned text of the PDF document.
+    """
     words = []
     for page in pages:
         first = get_first_last(
@@ -217,6 +262,24 @@ def split_markdown(
     min_score: float = 0.75,
     staircase: bool = True,
 ) -> Tuple[List[str], Dict]:
+    """
+    Split a PDF document into Markdown paragraphs.
+
+    Args:
+        doc (str): The text of the PDF document.
+        pdf (fitz.Document): The PDF document.
+        figure_info (Optional[List[Dict]]): A list of dictionaries, where each dictionary
+            specifies the information about a figure, such as its caption, page number, and bounding box.
+        doc_fig (Dict[str, str]): A dictionary mapping figure ids to LaTeX code.
+        minlen (int): The minimum length of a Markdown paragraph.
+        min_num_words: The minimum number of words in a Markdown paragraph.
+        doc_paragraph_chars: The maximum number of characters in a Markdown paragraph.
+        min_score: The minimum score for a Markdown paragraph to be split.
+        staircase: Whether to split the document into paragraphs with a staircase pattern.
+
+    Returns:
+        Tuple[List[str], Dict]: The list of Markdown paragraphs and the metadata.
+    """
     doc_paragraphs_full: List[str] = doc.split("\n")
     doc_paragraph_lengths = [len(p) for p in doc_paragraphs_full if len(p) > 1]
     num_lines = 1 + int(doc_paragraph_chars / np.mean(doc_paragraph_lengths))

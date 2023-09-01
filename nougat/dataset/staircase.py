@@ -42,6 +42,20 @@ def gini_impurity(
     reduction: Optional[str] = "sum",
     padded: bool = True,
 ) -> float:
+    """
+    Calculate the Gini impurity of a dataset split on a set of thresholds.
+
+    Args:
+        thresholds (np.ndarray): The thresholds to split the data on.
+        data (np.ndarray): The data to split.
+        labels (np.ndarray): The labels for the data.
+        classes (Optional[List[int]]): The classes to consider. If None, all classes are used.
+        reduction (Optional[str]): The reduction to apply to the impurity. One of "none", "sum", or "mean".
+        padded (bool): Whether to pad the thresholds with `[-0.5, data.max() + 0.5]`.
+
+    Returns:
+        float: The Gini impurity.
+    """
     G = []
     if not padded:
         thresholds = np.insert(
@@ -76,6 +90,18 @@ def step_impurity(
     labels: np.ndarray,
     classes: Optional[List[int]] = None,
 ) -> float:
+    """
+    Calculate the step-wise Gini impurity of a dataset split on a set of thresholds.
+
+    Args:
+        thresholds (np.ndarray): The thresholds to split the data on.
+        data (np.ndarray): The data to split.
+        labels (np.ndarray): The labels for the data.
+        classes (Optional[List[int]]): The classes to consider. If None, all classes are used.
+
+    Returns:
+        float: The step-wise Gini impurity.
+    """
     G = gini_impurity(thresholds, data, labels, reduction=None, classes=classes)
     out = []
     for i in range(len(G) - 1):
@@ -84,6 +110,13 @@ def step_impurity(
 
 
 class PaddedArray:
+    """
+    A wrapper class for an array that allows for relative indexing.
+
+    Args:
+        array (np.ndarray): The array to wrap.
+        range (Optional[Tuple[int, int]]): The range of the array to expose. Defaults to (1, -1).
+    """
     def __init__(
         self, array: np.ndarray, range: Optional[Tuple[int, int]] = (1, -1)
     ) -> None:
@@ -125,6 +158,13 @@ class PaddedArray:
 
 
 class Staircase:
+    """
+    A class for learning a staircase decision tree.
+
+    Args:
+        domain: The number of points in the domain.
+        n_classes: The number of classes.
+    """
     def __init__(self, domain: int, n_classes: int) -> None:
         self.domain = domain
         self.classes = n_classes
