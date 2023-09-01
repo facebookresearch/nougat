@@ -38,18 +38,20 @@ To get predictions for a PDF run
 ```$ nougat path/to/file.pdf```
 
 ```
-usage: nougat [-h] [--batchsize BATCHSIZE] [--checkpoint CHECKPOINT] [--out OUT] pdf [pdf ...]
+usage: nougat [-h] [--batchsize BATCHSIZE] [--checkpoint CHECKPOINT] [--out OUT] [--recompute] [--markdown] pdf [pdf ...]
 
 positional arguments:
   pdf                   PDF(s) to process.
 
-optional arguments:
+options:
   -h, --help            show this help message and exit
   --batchsize BATCHSIZE, -b BATCHSIZE
-                        Batch size to use. Defaults to 6 which runs on 24GB VRAM.
+                        Batch size to use.
   --checkpoint CHECKPOINT, -c CHECKPOINT
-                        Path to checkpoint directory
+                        Path to checkpoint directory.
   --out OUT, -o OUT     Output directory.
+  --recompute           Recompute already computed PDF, discarding previous predictions.
+  --markdown            Add postprocessing step for markdown compatibility.
 ```
 
 In the output directory every PDF will be saved as a `.mmd` file, the lightweight markup language, mostly compatible with [Mathpix Markdown](https://github.com/Mathpix/mathpix-markdown-it) (we make use of the LaTeX tables).
