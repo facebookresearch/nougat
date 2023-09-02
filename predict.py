@@ -46,27 +46,29 @@ def get_args():
         "-c",
         type=Path,
         default=None,
-        help="Path to checkpoint directory",
+        help="Path to checkpoint directory.",
     )
     parser.add_argument("--out", "-o", type=Path, help="Output directory.")
-    parser.add_argument("--recompute", action="store_true")
+    parser.add_argument("--recompute",
+                        action="store_true",
+                        help="Recompute already computed PDF, discarding previous predictions.")
     parser.add_argument(
         "--markdown",
         action="store_true",
-        help="Add postprocessing step for markdown compatibility",
+        help="Add postprocessing step for markdown compatibility.",
     )
     parser.add_argument("pdf", nargs="+", type=Path, help="PDF(s) to process.")
     args = parser.parse_args()
     if args.checkpoint is None or not args.checkpoint.exists():
         args.checkpoint = get_checkpoint(args.checkpoint)
     if args.out is None:
-        logging.warning("No output directory. Output will be printed to console")
+        logging.warning("No output directory. Output will be printed to console.")
     else:
         if not args.out.exists():
             logging.info("Output directory does not exist. Creating output directory.")
             args.out.mkdir(parents=True)
         if not args.out.is_dir():
-            logging.error("Output has to be directory")
+            logging.error("Output has to be directory.")
             sys.exit(1)
     if len(args.pdf) == 1 and not args.pdf[0].suffix == ".pdf":
         # input is a list of pdfs
@@ -101,7 +103,7 @@ def main():
                 pdf, partial(model.encoder.prepare_input, random_padding=False)
             )
         except fitz.fitz.FileDataError:
-            logging.info(f"Could not load file {str(pdf)}")
+            logging.info(f"Could not load file {str(pdf)}.")
             continue
         datasets.append(dataset)
     if len(datasets) == 0:
