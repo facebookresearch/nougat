@@ -61,6 +61,12 @@ def get_parser():
 
 
 def split_text(pages: List[str]):
+    """
+    Split a list of pages into text, inline math, display math, and table blocks.
+
+    Args:
+        pages: The pages to split.
+    """
     text, math, table = [], [], []
     for page in pages:
         for i, reg in enumerate([inline_reg, display_reg, table_reg]):

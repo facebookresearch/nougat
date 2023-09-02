@@ -15,6 +15,16 @@ from nougat.dataset.parser.markdown import format_document
 
 
 def check_file_path(paths: List[Path], wdir: Optional[Path] = None) -> List[str]:
+    """
+    Checks if the given file paths exist.
+
+    Args:
+        paths: A list of file paths.
+        wdir: The working directory. If None, the current working directory is used.
+
+    Returns:
+        A list of file paths that exist.
+    """
     files = []
     for path in paths:
         if type(path) == str:

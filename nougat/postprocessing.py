@@ -18,6 +18,17 @@ reference_pattern = re.compile(r"^\* \[\d+\]", flags=re.M)
 
 
 def markdown_compatible(s: str) -> str:
+    """
+    Make text compatible with Markdown formatting.
+
+    This function makes various text formatting adjustments to make it compatible with Markdown.
+
+    Args:
+        s (str): The input text to be made Markdown-compatible.
+
+    Returns:
+        str: The Markdown-compatible text.
+    """
     # equation tag
     s = re.sub(
         r"^\(([\d.]+[a-zA-Z]?)\) \\\[(.+?)\\\]$", r"\[\2 \\tag{\1}\]", s, flags=re.M
@@ -52,7 +63,9 @@ def markdown_compatible(s: str) -> str:
 
 
 def find_next_punctuation(s: str, start_inx=0):
-    """Find the index of the next punctuation mark
+    """
+    Find the index of the next punctuation mark
+
     Args:
         s: String to examine
         start_inx: Index where to start
@@ -66,7 +79,9 @@ def find_next_punctuation(s: str, start_inx=0):
 
 
 def find_last_punctuation(s: str, start_inx=0):
-    """Find the index of the last punctuation mark before start_inx
+    """
+    Find the index of the last punctuation mark before start_inx
+
     Args:
         s: String to examine
         start_inx: Index where to look before
@@ -81,15 +96,18 @@ def find_last_punctuation(s: str, start_inx=0):
 
 def truncate_repetitions(s: str, min_len=30):
     """
-    This function will attempt to truncate repeating stuff in the string.
-    It does this by looking at the longest repeating substring, trying to find where the repetition first
-    starts and then just having it repeat once and delete everything afterwards. To be removed, repetitions
-    need to be continuous.
-    Args:
-          s (str): Input raw prediction to be truncated
-          min_len (int): The minimum length of the repeating segment
-    """
+    Attempt to truncate repeating segments in the input string.
 
+    This function looks for the longest repeating substring at the end of the input string and truncates
+    it to appear only once. To be considered for removal, repetitions need to be continuous.
+
+    Args:
+        s (str): The input raw prediction to be truncated.
+        min_len (int): The minimum length of the repeating segment.
+
+    Returns:
+        str: The input string with repeated segments truncated.
+    """
     s_lower = s.lower()
     s_len = len(s_lower)
 
@@ -165,6 +183,18 @@ def remove_numbers(lines):
 
 
 def get_slices(lines, clean_lines):
+    """
+    Get slices of text based on specific criteria within the lines.
+
+    This function identifies and returns slices of text from the input lines based on certain conditions.
+
+    Args:
+        lines (list of str): The list of lines containing the text.
+        clean_lines (list of str): A cleaned version of the text (without numbers).
+
+    Returns:
+        list of tuple: A list of tuples representing the start and end indices of text slices.
+    """
     inds = np.zeros(len(lines))
     for i in range(len(lines) - 1):
         j = i + 1
@@ -196,6 +226,19 @@ def get_slices(lines, clean_lines):
 
 
 def remove_slice_from_lines(lines, clean_text, sli) -> str:
+    """
+    Remove a slice of text from the lines based on specific criteria.
+
+    This function identifies a slice of text within the lines and removes it based on certain conditions.
+
+    Args:
+        lines (list of str): The list of lines containing the text.
+        clean_text (list of str): A cleaned version of the text (without numbers).
+        sli (tuple): A tuple representing the start and end indices of the slice to be removed.
+
+    Returns:
+        str: The removed slice of text as a single string.
+    """
     base = clean_text[sli[0]]
     section = list(sli)
     check_start_flag = False
@@ -251,6 +294,18 @@ def remove_slice_from_lines(lines, clean_text, sli) -> str:
 
 
 def remove_hallucinated_references(text: str) -> str:
+    """
+    Remove hallucinated or missing references from the text.
+
+    This function identifies and removes references that are marked as missing or hallucinated
+    from the input text.
+
+    Args:
+        text (str): The input text containing references.
+
+    Returns:
+        str: The text with hallucinated references removed.
+    """
     lines = text.split("\n")
     if len(lines) == 0:
         return ""
@@ -270,6 +325,16 @@ def remove_hallucinated_references(text: str) -> str:
 
 
 def postprocess_single(generation: str, markdown_fix: bool = True) -> str:
+    """
+    Postprocess a single generated text.
+
+    Args:
+        generation (str): The generated text to be postprocessed.
+        markdown_fix (bool, optional): Whether to perform Markdown formatting fixes. Default is True.
+
+    Returns:
+        str: The postprocessed text.
+    """
     generation = re.sub(
         r"(?:\n|^)#+ \d*\W? ?(.{100,})", r"\n\1", generation
     )  # too long section titles probably are none
@@ -417,6 +482,18 @@ def postprocess_single(generation: str, markdown_fix: bool = True) -> str:
 def postprocess(
     generation: Union[str, List[str]], markdown_fix: bool = True
 ) -> Union[str, List[str]]:
+    """
+    Postprocess generated text or a list of generated texts.
+
+    This function can be used to perform postprocessing on generated text, such as fixing Markdown formatting.
+
+    Args:
+        generation (Union[str, List[str]]): The generated text or a list of generated texts.
+        markdown_fix (bool, optional): Whether to perform Markdown formatting fixes. Default is True.
+
+    Returns:
+        Union[str, List[str]]: The postprocessed text or list of postprocessed texts.
+    """
     if type(generation) == list:
         if os.environ.get("NOUGAT_MULTIPROCESSING"):
             with Pool(int(os.environ.get("NOUGAT_MULTIPROCESSING"))) as p:

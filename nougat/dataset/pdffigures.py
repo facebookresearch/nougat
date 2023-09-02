@@ -19,6 +19,18 @@ if PDFFIGURES2_JAR_PATH is None:
 def call_pdffigures(
     pdf_path: str, figures_dir: str, timeout: int = 30, verbose: bool = False
 ):
+    """
+    Extract figures from a PDF file using pdffigures2.
+
+    Args:
+        pdf_path (str): The path to the PDF file.
+        figures_dir (str): The directory where the figures will be extracted.
+        timeout (int, optional): The timeout in seconds for the pdffigures2 command. Defaults to 30.
+        verbose (bool, optional): Whether to print the output of the pdffigures2 command. Defaults to False.
+
+    Returns:
+        str: The path to the JSON file containing the extracted figures.
+    """
     os.makedirs(figures_dir, exist_ok=True)
     kwargs = (
         {} if verbose else {"stderr": subprocess.DEVNULL, "stdout": subprocess.DEVNULL}

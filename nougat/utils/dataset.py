@@ -22,6 +22,19 @@ from nougat.dataset.rasterize import rasterize_paper
 
 
 class ImageDataset(torch.utils.data.Dataset):
+    """
+    Dataset for processing a list of images using a preparation function.
+
+    This dataset takes a list of image paths and applies a preparation function to each image.
+
+    Args:
+        img_list (list): List of image paths.
+        prepare (Callable): A preparation function to process the images.
+
+    Attributes:
+        img_list (list): List of image paths.
+        prepare (Callable): The preparation function.
+    """
     def __init__(self, img_list, prepare: Callable):
         super().__init__()
         self.img_list = img_list
@@ -51,6 +64,19 @@ class ImageDataset(torch.utils.data.Dataset):
 
 
 class LazyDataset(Dataset):
+    """
+    Lazy loading dataset for processing PDF documents.
+
+    This dataset allows lazy loading of PDF documents and provides access to processed images
+    using a specified preparation function.
+
+    Args:
+        pdf (str): Path to the PDF document.
+        prepare (Callable): A preparation function to process the images.
+
+    Attributes:
+        name (str): Name of the PDF document.
+    """
     def __init__(self, pdf, prepare: Callable):
         super().__init__()
         self.prepare = prepare
@@ -93,6 +119,21 @@ class LazyDataset(Dataset):
 
 
 class SciPDFDataset(Dataset):
+    """
+    Custom dataset for scientific PDF data.
+
+    This dataset loads data from JSONL files and provides access to images, ground truth,
+    and metadata.
+
+    Args:
+        path_to_index (str): Path to the index file.
+        split (str, optional): Split of the dataset (e.g., "train", "test"). Default is "train".
+        root_name (str, optional): Root directory name. Default is an empty string.
+        template (str, optional): Template for split naming. Default is "%s".
+
+    Attributes:
+        empty_sample: Placeholder for empty samples.
+    """
     empty_sample = None
 
     def __init__(

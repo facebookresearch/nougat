@@ -42,6 +42,20 @@ def gini_impurity(
     reduction: Optional[str] = "sum",
     padded: bool = True,
 ) -> float:
+    """
+    Calculate the Gini impurity of a dataset split on a set of thresholds.
+
+    Args:
+        thresholds (np.ndarray): The thresholds to split the data on.
+        data (np.ndarray): The data to split.
+        labels (np.ndarray): The labels for the data.
+        classes (Optional[List[int]]): The classes to consider. If None, all classes are used.
+        reduction (Optional[str]): The reduction to apply to the impurity. One of "none", "sum", or "mean".
+        padded (bool): Whether to pad the thresholds with `[-0.5, data.max() + 0.5]`.
+
+    Returns:
+        float: The Gini impurity.
+    """
     G = []
     if not padded:
         thresholds = np.insert(
@@ -76,6 +90,18 @@ def step_impurity(
     labels: np.ndarray,
     classes: Optional[List[int]] = None,
 ) -> float:
+    """
+    Calculate the step-wise Gini impurity of a dataset split on a set of thresholds.
+
+    Args:
+        thresholds (np.ndarray): The thresholds to split the data on.
+        data (np.ndarray): The data to split.
+        labels (np.ndarray): The labels for the data.
+        classes (Optional[List[int]]): The classes to consider. If None, all classes are used.
+
+    Returns:
+        float: The step-wise Gini impurity.
+    """
     G = gini_impurity(thresholds, data, labels, reduction=None, classes=classes)
     out = []
     for i in range(len(G) - 1):
@@ -84,6 +110,13 @@ def step_impurity(
 
 
 class PaddedArray:
+    """
+    A wrapper class for an array that allows for relative indexing.
+
+    Args:
+        array (np.ndarray): The array to wrap.
+        range (Optional[Tuple[int, int]]): The range of the array to expose. Defaults to (1, -1).
+    """
     def __init__(
         self, array: np.ndarray, range: Optional[Tuple[int, int]] = (1, -1)
     ) -> None:
@@ -125,6 +158,13 @@ class PaddedArray:
 
 
 class Staircase:
+    """
+    A class for learning a staircase decision tree.
+
+    Args:
+        domain: The number of points in the domain.
+        n_classes: The number of classes.
+    """
     def __init__(self, domain: int, n_classes: int) -> None:
         self.domain = domain
         self.classes = n_classes
@@ -140,6 +180,18 @@ class Staircase:
         data: np.ndarray,
         labels: np.ndarray,
     ):
+        """
+        Fit statistical thresholds for anomaly detection.
+
+        This method fits statistical thresholds for anomaly detection based on input data and labels.
+
+        Args:
+            data (np.ndarray): The input data.
+            labels (np.ndarray): The labels corresponding to the data.
+
+        Note:
+            This method modifies the internal state of the object to set statistical thresholds.
+        """
         onehot = np.eye(self.classes)[labels.reshape(-1)]
         onehot.reshape(list(labels.shape) + [self.classes])
         k = onehot * data.T.repeat(self.classes, 1)
@@ -166,6 +218,20 @@ class Staircase:
         early_stop_after: int = 10,
         fixed: bool = True,
     ) -> None:
+        """
+        Fit statistical thresholds for anomaly detection.
+
+        This method fits statistical thresholds for anomaly detection based on input data and labels.
+
+        Args:
+            data (np.ndarray): The input data.
+            labels (np.ndarray): The labels corresponding to the data.
+            early_stop_after (int, optional): The number of consecutive early stops to consider. Default is 10.
+            fixed (bool, optional): Whether to use fixed thresholds. Default is True.
+
+        Note:
+            This method modifies the internal state of the object to set statistical thresholds.
+        """
         assert data.ndim == 1
         assert labels.ndim <= 2
         if self.classes == 1:

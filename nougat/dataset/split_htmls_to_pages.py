@@ -32,6 +32,19 @@ def process_paper(
     json_file: Path,
     args: argparse.Namespace,
 ) -> Tuple[int, int]:
+    """
+    Process a single paper.
+
+    Args:
+        fname (str): The paper's filename.
+        pdf_file (Path): The path to the PDF file.
+        html_file (Path): The path to the HTML file.
+        json_file (Path): The path to the JSON file containing the extracted figures.
+        args (argparse.Namespace): The command-line arguments.
+
+    Returns:
+        Tuple[int, int]: The number of total pages and the number of recognized pages.
+    """
     total_pages = 0
     num_recognized_pages = 0
     try:

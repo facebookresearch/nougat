@@ -21,6 +21,22 @@ def alb_wrapper(transform):
 
 
 class Erosion(alb.ImageOnlyTransform):
+    """
+    Apply erosion operation to an image.
+
+    Erosion is a morphological operation that shrinks the white regions in a binary image.
+
+    Args:
+        scale (int or tuple/list of int): The scale or range for the size of the erosion kernel.
+            If an integer is provided, a square kernel of that size will be used.
+            If a tuple or list is provided, it should contain two integers representing the minimum
+            and maximum sizes for the erosion kernel.
+        always_apply (bool, optional): Whether to always apply this transformation. Default is False.
+        p (float, optional): The probability of applying this transformation. Default is 0.5.
+
+    Returns:
+        numpy.ndarray: The transformed image.
+    """
     def __init__(self, scale, always_apply=False, p=0.5):
         super().__init__(always_apply=always_apply, p=p)
         if type(scale) is tuple or type(scale) is list:
@@ -38,6 +54,22 @@ class Erosion(alb.ImageOnlyTransform):
 
 
 class Dilation(alb.ImageOnlyTransform):
+    """
+    Apply dilation operation to an image.
+
+    Dilation is a morphological operation that expands the white regions in a binary image.
+
+    Args:
+        scale (int or tuple/list of int): The scale or range for the size of the dilation kernel.
+            If an integer is provided, a square kernel of that size will be used.
+            If a tuple or list is provided, it should contain two integers representing the minimum
+            and maximum sizes for the dilation kernel.
+        always_apply (bool, optional): Whether to always apply this transformation. Default is False.
+        p (float, optional): The probability of applying this transformation. Default is 0.5.
+
+    Returns:
+        numpy.ndarray: The transformed image.
+    """
     def __init__(self, scale, always_apply=False, p=0.5):
         super().__init__(always_apply=always_apply, p=p)
         if type(scale) is tuple or type(scale) is list:
@@ -55,6 +87,20 @@ class Dilation(alb.ImageOnlyTransform):
 
 
 class Bitmap(alb.ImageOnlyTransform):
+    """
+    Apply a bitmap-style transformation to an image.
+
+    This transformation replaces all pixel values below a certain threshold with a specified value.
+
+    Args:
+        value (int, optional): The value to replace pixels below the threshold with. Default is 0.
+        lower (int, optional): The threshold value below which pixels will be replaced. Default is 200.
+        always_apply (bool, optional): Whether to always apply this transformation. Default is False.
+        p (float, optional): The probability of applying this transformation. Default is 0.5.
+
+    Returns:
+        numpy.ndarray: The transformed image.
+    """
     def __init__(self, value=0, lower=200, always_apply=False, p=0.5):
         super().__init__(always_apply=always_apply, p=p)
         self.lower = lower

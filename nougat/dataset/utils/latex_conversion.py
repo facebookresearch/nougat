@@ -111,6 +111,19 @@ def remove_line_breaks(string: str) -> str:
 
 
 def normalize_tex(math: str, inline: bool) -> str:
+    """
+    Normalize TeX math expressions.
+
+    This function takes a TeX math expression and performs various normalization steps to ensure
+    consistency and proper formatting.
+
+    Args:
+        math (str): The input TeX math expression.
+        inline (bool): Indicates whether the expression should be inline (True) or displayed (False).
+
+    Returns:
+        str: The normalized TeX math expression.
+    """
     math = math.strip()
     if not math:
         return ""

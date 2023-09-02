@@ -290,6 +290,7 @@ class BARTDecoder(nn.Module):
         """
         Args:
             input_ids: (batch_size, sequence_lenth)
+        
         Returns:
             input_ids: (batch_size, sequence_length)
             attention_mask: (batch_size, sequence_length)
@@ -379,7 +380,6 @@ class NougatConfig(PretrainedConfig):
         name_or_path:
             Name of a pretrained model name either registered in huggingface.co. or saved in local
     """
-
     model_type = "nougat"
 
     def __init__(
@@ -490,7 +490,7 @@ def subdiv(l, b=10):
 
 class NougatModel(PreTrainedModel):
     r"""
-    Nougat: Neural Optical UnderstandinG for Academic documenTs.
+    Nougat: Neural Optical UnderstandinG for Academic documents.
     The encoder converts an image of an academic document into a series of embeddings.
     Then, the decoder generates a sequence of tokens based on encoder's output.
     This sequence can be translated into a structured markup language format.
