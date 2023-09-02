@@ -55,7 +55,7 @@ def remove_line_breaks(parts: List[str]):
 def leading_trailing_whitespace(
     parts: List[str],
 ) -> Tuple[List[str], List[str], List[str]]:
-    """splits the list into three parst. The first and last return elements are made up only of whitespace
+    """splits the list into three parts. The first and last return elements are made up only of whitespace
 
     Args:
         parts (List[str]): List to split.
@@ -86,7 +86,7 @@ def latex_escape(string: str) -> str:
 
 
 def is_empty(content: List) -> bool:
-    """Used to determine if a Section is emtpy"""
+    """Used to determine if a Section is empty"""
     empty = True
     for part in content:
         if len(part.strip()):

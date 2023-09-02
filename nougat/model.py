@@ -683,7 +683,7 @@ class NougatModel(PreTrainedModel):
             model_path, *model_args, **kwargs
         )
 
-        # truncate or interplolate position embeddings of decoder
+        # truncate or interpolate position embeddings of decoder
         max_length = kwargs.get("max_length", model.config.max_position_embeddings)
         if (
             max_length != model.config.max_position_embeddings

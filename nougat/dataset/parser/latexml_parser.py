@@ -355,7 +355,7 @@ def parse_latexml_children(html: BeautifulSoup, parent: Element) -> None:
                 line = alg.add_line(Element())
                 parse_latexml_children(child, line)
             else:
-                printerr("Listing line outside algorith environment", file=sys.stderr)
+                printerr("Listing line outside algorithm environment", file=sys.stderr)
         elif sv.match("dl.ltx_description", child):
             def_list = parent.append(DefinitionList())
             parse_latexml_children(child, def_list)
