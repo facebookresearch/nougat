@@ -28,6 +28,8 @@ From repository:
 pip install git+https://github.com/facebookresearch/nougat
 ```
 
+> Note, on Windows: If you want to utilize a GPU, make sure you first install the correct PyTorch version. Follow instructions [here](https://pytorch.org/get-started/locally/)
+
 There are extra dependencies if you want to call the model from an API or generate a dataset.
 Install via
 
