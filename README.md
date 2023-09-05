@@ -7,6 +7,7 @@
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/release/python-390/)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Hugging Face Spaces](https://img.shields.io/badge/🤗%20Hugging%20Face-Community%20Space-blue)](https://huggingface.co/spaces/ysharma/nougat)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1y1ubTVhLdViAWLTwjnHguSX_YhI8iSvY)
 
 </div>
 
@@ -15,6 +16,8 @@ This is the official repository for Nougat, the academic document PDF parser tha
 Project page: https://facebookresearch.github.io/nougat/
 
 Huggingface Community Demo: https://huggingface.co/spaces/ysharma/nougat
+
+Run Gradio demo for Nougat locally: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1y1ubTVhLdViAWLTwjnHguSX_YhI8iSvY)
 
 ## Install
 
