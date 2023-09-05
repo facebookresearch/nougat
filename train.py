@@ -10,13 +10,18 @@ import os
 from os.path import basename
 from pathlib import Path
 
-import pytorch_lightning as pl
+import lightning.pytorch as pl
 import torch
-from pytorch_lightning.callbacks import LearningRateMonitor, ModelCheckpoint, Callback
-from pytorch_lightning.loggers.tensorboard import TensorBoardLogger
-from pytorch_lightning.plugins import CheckpointIO
-from pytorch_lightning.plugins.environments import SLURMEnvironment
-from pytorch_lightning.utilities import rank_zero_only
+from lightning.pytorch.callbacks import (
+    LearningRateMonitor,
+    ModelCheckpoint,
+    Callback,
+    GradientAccumulationScheduler,
+)
+from lightning.pytorch.loggers.tensorboard import TensorBoardLogger
+from lightning.pytorch.plugins import CheckpointIO
+from lightning.pytorch.plugins.environments import SLURMEnvironment
+from lightning.pytorch.utilities import rank_zero_only
 from sconf import Config
 
 from nougat import NougatDataset
@@ -24,9 +29,9 @@ from lightning_module import NougatDataPLModule, NougatModelPLModule
 
 try:
     import wandb
-    from pytorch_lightning.loggers import WandbLogger as Logger
+    from lightning.pytorch.loggers import WandbLogger as Logger
 except ModuleNotFoundError:
-    from pytorch_lightning.loggers.tensorboard import TensorBoardLogger as Logger
+    from lightning.pytorch.loggers.tensorboard import TensorBoardLogger as Logger
 
 import logging
 
@@ -52,6 +57,8 @@ class CustomCheckpointIO(CheckpointIO):
             Remove a checkpoint from the specified path.
 
     """
+
+    @rank_zero_only
     def save_checkpoint(self, checkpoint, path, storage_options=None):
         """
         Save a checkpoint to the specified path.
@@ -132,7 +139,7 @@ def train(config):
     Args:
         `config` (dict): A dictionary containing configuration settings for training.
     """
-    pl.utilities.seed.seed_everything(config.get("seed", 42), workers=True)
+    pl.seed_everything(config.get("seed", 42), workers=True)
 
     model_module = NougatModelPLModule(config)
     data_module = NougatDataPLModule(config)
@@ -171,27 +178,34 @@ def train(config):
             default_hp_metric=False,
         )
     trainer = pl.Trainer(
-        resume_from_checkpoint=config.get("resume_from_checkpoint_path", None),
         num_nodes=config.get("num_nodes", 1),
-        gpus=torch.cuda.device_count(),
-        strategy="ddp",
+        devices=torch.cuda.device_count(),
+        strategy="ddp_find_unused_parameters_true",
         accelerator="gpu",
-        plugins=[custom_ckpt, SLURMEnvironment(auto_requeue=False)],
+        plugins=[SLURMEnvironment(auto_requeue=False)],
         max_epochs=config.max_epochs,
         max_steps=config.max_steps,
         val_check_interval=config.val_check_interval,
         check_val_every_n_epoch=config.check_val_every_n_epoch,
         limit_val_batches=config.val_batches,
         gradient_clip_val=config.gradient_clip_val,
-        accumulate_grad_batches=config.accumulate_grad_batches,
         log_every_n_steps=15,
-        precision="bf16",
+        precision="bf16-mixed",
         num_sanity_val_steps=0,
         logger=logger,
-        callbacks=[lr_callback, checkpoint_callback, grad_norm_callback],
+        callbacks=[
+            lr_callback,
+            grad_norm_callback,
+            checkpoint_callback,
+            GradientAccumulationScheduler({0: config.accumulate_grad_batches}),
+        ],
     )
 
-    trainer.fit(model_module, data_module)
+    trainer.fit(
+        model_module,
+        data_module,
+        ckpt_path=config.get("resume_from_checkpoint_path", None),
+    )
 
 
 if __name__ == "__main__":

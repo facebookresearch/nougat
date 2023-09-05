@@ -83,13 +83,16 @@ def split_text(pages: List[str]):
     return text, math, table
 
 
-def get_metrics(gt: List[str], pred: List[str]):
+def get_metrics(gt: List[str], pred: List[str], pool: bool = True):
     metrics = defaultdict(list)
-    with Pool() as p:
-        _metrics = p.starmap(compute_metrics, iterable=zip(pred, gt))
-        for m in _metrics:
-            for key, value in m.items():
-                metrics[key].append(value)
+    if pool:
+        with Pool() as p:
+            _metrics = p.starmap(compute_metrics, iterable=zip(pred, gt))
+    else:
+        _metrics = [compute_metrics(p, g) for p, g in zip(pred, gt)]
+    for m in _metrics:
+        for key, value in m.items():
+            metrics[key].append(value)
     return dict(metrics)
 
 

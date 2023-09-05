@@ -49,9 +49,11 @@ def get_args():
         help="Path to checkpoint directory.",
     )
     parser.add_argument("--out", "-o", type=Path, help="Output directory.")
-    parser.add_argument("--recompute",
-                        action="store_true",
-                        help="Recompute already computed PDF, discarding previous predictions.")
+    parser.add_argument(
+        "--recompute",
+        action="store_true",
+        help="Recompute already computed PDF, discarding previous predictions.",
+    )
     parser.add_argument(
         "--markdown",
         action="store_true",

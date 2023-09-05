@@ -40,6 +40,7 @@ class Element(Generic[EL]):
         parent (Element): The parent element.
         children (List[Element]): List of child elements.
     """
+
     parent: "Element" = None
     children: List["Element"] = field(default_factory=list)
 
@@ -137,6 +138,7 @@ class Reference:
     Methods:
         as_dict(): Convert the reference object to a dictionary.
     """
+
     title: Element = None
     authors: List[Author] = field(default_factory=list)
     ids: Dict[str, str] = field(default_factory=dict)
@@ -286,6 +288,7 @@ class DefinitionList(Element):
     Methods:
         add_item(item: Definition) -> Definition: Add a definition item to the list.
     """
+
     header: Element = None
     items: List[Element] = field(default_factory=list)
 
@@ -392,6 +395,7 @@ class Spec:
         set_attrs(attrs: Dict[str, Any]) -> None: Automatically set all attributes from HTML class attributes.
         __str__() -> str: Get the string representation of the specification.
     """
+
     t: int = field(default=0, repr=False)
     b: int = field(default=0, repr=False)
     l: int = field(default=0)
@@ -473,6 +477,7 @@ class TableCell(Element):
         set_attrs(attrs: Dict[str, Any]) -> None: Set attributes for the cell from HTML attributes.
         plaintext() -> str: Get the plaintext content of the cell.
     """
+
     multicolumn: Optional[int] = None
     multirow: Optional[int] = None
     spec: Spec = None
@@ -524,6 +529,7 @@ class TableRow(Element):
         hline_below() -> str: Get the horizontal line description for the bottom of the row.
         plaintext() -> str: Get the plaintext content of the row.
     """
+
     cells: List[TableCell] = field(default_factory=list)
 
     def add_cell(self, cell: TableCell):

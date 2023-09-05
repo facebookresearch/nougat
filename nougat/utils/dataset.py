@@ -35,6 +35,7 @@ class ImageDataset(torch.utils.data.Dataset):
         img_list (list): List of image paths.
         prepare (Callable): The preparation function.
     """
+
     def __init__(self, img_list, prepare: Callable):
         super().__init__()
         self.img_list = img_list
@@ -77,6 +78,7 @@ class LazyDataset(Dataset):
     Attributes:
         name (str): Name of the PDF document.
     """
+
     def __init__(self, pdf, prepare: Callable):
         super().__init__()
         self.prepare = prepare
@@ -134,6 +136,7 @@ class SciPDFDataset(Dataset):
     Attributes:
         empty_sample: Placeholder for empty samples.
     """
+
     empty_sample = None
 
     def __init__(

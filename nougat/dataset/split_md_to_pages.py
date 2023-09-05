@@ -40,6 +40,7 @@ class BagOfWords:
         target (Optional[List[int]]): The target labels for the training sentences. Defaults to None.
 
     """
+
     def __init__(
         self,
         sentences: List[str],
@@ -91,7 +92,7 @@ def remove_short_seqs(seqs: List[str], minimum: int = 10) -> List[str]:
 def find_figures(
     pdf_pages: List[List[str]], figure_info: Union[Dict, List]
 ) -> List[Tuple[int, int]]:
-    """"
+    """ "
     Find the locations of figures in a PDF file.
 
     Args:

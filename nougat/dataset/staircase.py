@@ -117,6 +117,7 @@ class PaddedArray:
         array (np.ndarray): The array to wrap.
         range (Optional[Tuple[int, int]]): The range of the array to expose. Defaults to (1, -1).
     """
+
     def __init__(
         self, array: np.ndarray, range: Optional[Tuple[int, int]] = (1, -1)
     ) -> None:
@@ -165,6 +166,7 @@ class Staircase:
         domain: The number of points in the domain.
         n_classes: The number of classes.
     """
+
     def __init__(self, domain: int, n_classes: int) -> None:
         self.domain = domain
         self.classes = n_classes

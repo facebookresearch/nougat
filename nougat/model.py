@@ -290,7 +290,7 @@ class BARTDecoder(nn.Module):
         """
         Args:
             input_ids: (batch_size, sequence_lenth)
-        
+
         Returns:
             input_ids: (batch_size, sequence_length)
             attention_mask: (batch_size, sequence_length)
