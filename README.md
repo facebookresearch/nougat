@@ -14,8 +14,6 @@ This is the official repository for Nougat, the academic document PDF parser tha
 
 Project page: https://facebookresearch.github.io/nougat/
 
-Huggingface Community Demo: https://huggingface.co/spaces/ysharma/nougat
-
 ## Install
 
 From pip:
@@ -40,7 +38,9 @@ Install via
 
 To get predictions for a PDF run 
 
-```$ nougat path/to/file.pdf```
+```
+$ nougat path/to/file.pdf -o output_directory
+```
 
 ```
 usage: nougat [-h] [--batchsize BATCHSIZE] [--checkpoint CHECKPOINT] [--out OUT] [--recompute] [--markdown] pdf [pdf ...]
@@ -65,11 +65,22 @@ In the output directory every PDF will be saved as a `.mmd` file, the lightweigh
 
 With the extra dependencies you use `app.py` to start an API. Call
 
-```
+```sh
 $ nougat_api
 ```
 
 To get a prediction of a PDF file by making a POST request to http://127.0.0.1:8503/predict/. It also accepts parameters `start` and `stop` to limit the computation to select page numbers (boundaries are included).
+
+The response is a string with the markdown text of the document.
+
+```sh
+curl -X 'POST' \
+  'http://127.0.0.1:8503/predict/' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: multipart/form-data' \
+  -F 'file=@<PDFFILE.pdf>;type=application/pdf'
+```
+To use the limit the conversion to pages 1 to 5, ue the start/stop parameters in the request URL: http://127.0.0.1:8503/predict/?start=1&stop=5
 
 ## Dataset
 ### Generate dataset

@@ -26,9 +26,11 @@ if torch.cuda.is_available():
     BATCH_SIZE = int(
         torch.cuda.get_device_properties(0).total_memory / 1024 / 1024 / 1000 * 0.3
     )
+    if BATCH_SIZE == 0:
+        logging.warning("GPU VRAM is too small. Computing on CPU.")
 else:
     # don't know what a good value is here. Would not recommend to run on CPU
-    BATCH_SIZE = 5
+    BATCH_SIZE = 1
     logging.warning("No GPU found. Conversion on CPU is very slow.")
 
 
@@ -86,8 +88,12 @@ def get_args():
 def main():
     args = get_args()
     model = NougatModel.from_pretrained(args.checkpoint).to(torch.bfloat16)
-    if torch.cuda.is_available():
-        model.to("cuda")
+    if args.batchsize > 0:
+        if torch.cuda.is_available():
+            model.to("cuda")
+    else:
+        # set batch size to 1. Need to check if there are benefits for CPU conversion for >1
+        args.batchsize = 1
     model.eval()
     datasets = []
     for pdf in args.pdf:

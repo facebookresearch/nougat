@@ -31,7 +31,7 @@ if NOUGAT_CHECKPOINT is None:
     )
     sys.exit(1)
 
-app = FastAPI(title="LaTeX-OCR API")
+app = FastAPI(title="Nougat API")
 origins = ["http://localhost", "http://127.0.0.1"]
 
 app.add_middleware(
