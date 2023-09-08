@@ -139,8 +139,7 @@ def main():
             if output.strip() == "[MISSING_PAGE_POST]":
                 # uncaught repetitions -- most likely empty page
                 predictions.append(f"\n\n[MISSING_PAGE_EMPTY:{page_num}]\n\n")
-                continue
-            if model_output["repeats"][j] is not None:
+            elif model_output["repeats"][j] is not None:
                 if model_output["repeats"][j] > 0:
                     # If we end up here, it means the output is most likely not complete and was truncated.
                     logging.warning(f"Skipping page {page_num} due to repetitions.")
