@@ -80,7 +80,7 @@ curl -X 'POST' \
   -H 'Content-Type: multipart/form-data' \
   -F 'file=@<PDFFILE.pdf>;type=application/pdf'
 ```
-To use the limit the conversion to pages 1 to 5, ue the start/stop parameters in the request URL: http://127.0.0.1:8503/predict/?start=1&stop=5
+To use the limit the conversion to pages 1 to 5, use the start/stop parameters in the request URL: http://127.0.0.1:8503/predict/?start=1&stop=5
 
 ## Dataset
 ### Generate dataset
