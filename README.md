@@ -43,7 +43,7 @@ $ nougat path/to/file.pdf -o output_directory
 ```
 
 ```
-usage: nougat [-h] [--batchsize BATCHSIZE] [--checkpoint CHECKPOINT] [--out OUT] [--recompute] [--markdown] pdf [pdf ...]
+usage: nougat [-h] [--batchsize BATCHSIZE] [--checkpoint CHECKPOINT] [--model MODEL_TAG] [--out OUT] [--recompute] [--markdown] pdf [pdf ...]
 
 positional arguments:
   pdf                   PDF(s) to process.
@@ -54,9 +54,16 @@ options:
                         Batch size to use.
   --checkpoint CHECKPOINT, -c CHECKPOINT
                         Path to checkpoint directory.
+  --model MODEL_TAG, -m MODEL_TAG
+                        Model tag to use.
   --out OUT, -o OUT     Output directory.
   --recompute           Recompute already computed PDF, discarding previous predictions.
   --markdown            Add postprocessing step for markdown compatibility.
+```
+
+The default model tag is `0.1.0-small`. If you want to use the base model, use `0.1.0-base`.
+```
+$ nougat path/to/file.pdf -o output_directory -m 0.1.0-base
 ```
 
 In the output directory every PDF will be saved as a `.mmd` file, the lightweight markup language, mostly compatible with [Mathpix Markdown](https://github.com/Mathpix/mathpix-markdown-it) (we make use of the LaTeX tables).

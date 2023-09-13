@@ -46,8 +46,17 @@ def download_as_bytes_with_progress(url: str, name: str = None) -> bytes:
     return bio.getvalue()
 
 
-def download_checkpoint(checkpoint: Path):
-    print("downloading nougat checkpoint version", MODEL_TAG, "to path", checkpoint)
+def download_checkpoint(checkpoint: Path, model_tag: str = MODEL_TAG):
+    """
+    Download the Nougat model checkpoint.
+
+    This function downloads the Nougat model checkpoint from GitHub.
+
+    Args:
+        checkpoint (Path): The path to the checkpoint.
+        model_tag (str): The model tag to download. Default is "0.1.0-small".
+    """
+    print("downloading nougat checkpoint version", model_tag, "to path", checkpoint)
     files = [
         "config.json",
         "pytorch_model.bin",
@@ -56,14 +65,14 @@ def download_checkpoint(checkpoint: Path):
         "tokenizer_config.json",
     ]
     for file in files:
-        download_url = f"{BASE_URL}/{MODEL_TAG}/{file}"
+        download_url = f"{BASE_URL}/{model_tag}/{file}"
         binary_file = download_as_bytes_with_progress(download_url, file)
         if len(binary_file) > 15:  # sanity check
             (checkpoint / file).write_bytes(binary_file)
 
 
 def get_checkpoint(
-    checkpoint_path: Optional[os.PathLike] = None, download: bool = True
+    checkpoint_path: Optional[os.PathLike] = None, model_tag: str = MODEL_TAG, download: bool = True
 ) -> Path:
     """
     Get the path to the Nougat model checkpoint.
@@ -74,6 +83,8 @@ def get_checkpoint(
     Args:
         checkpoint_path (Optional[os.PathLike]): The path to the checkpoint. If not provided,
             it will check the "NOUGAT_CHECKPOINT" environment variable or use the default location.
+            Default is None.
+        model_tag (str): The model tag to download. Default is "0.1.0-small".
         download (bool): Whether to download the checkpoint if it doesn't exist or is empty.
             Default is True.
 
@@ -82,13 +93,13 @@ def get_checkpoint(
     """
     checkpoint = Path(
         checkpoint_path
-        or os.environ.get("NOUGAT_CHECKPOINT", torch.hub.get_dir() + "/nougat")
+        or os.environ.get("NOUGAT_CHECKPOINT", torch.hub.get_dir() + "/nougat") + "/" + model_tag
     )
     if checkpoint.exists() and checkpoint.is_file():
         checkpoint = checkpoint.parent
     if download and (not checkpoint.exists() or len(os.listdir(checkpoint)) < 5):
         checkpoint.mkdir(parents=True, exist_ok=True)
-        download_checkpoint(checkpoint)
+        download_checkpoint(checkpoint, model_tag=model_tag)
     return checkpoint
 
 

@@ -50,6 +50,13 @@ def get_args():
         default=None,
         help="Path to checkpoint directory.",
     )
+    parser.add_argument(
+        "--model",
+        "-m",
+        type=str,
+        default=None,
+        help=f"Model tag to use.",
+    )
     parser.add_argument("--out", "-o", type=Path, help="Output directory.")
     parser.add_argument(
         "--recompute",
@@ -64,7 +71,7 @@ def get_args():
     parser.add_argument("pdf", nargs="+", type=Path, help="PDF(s) to process.")
     args = parser.parse_args()
     if args.checkpoint is None or not args.checkpoint.exists():
-        args.checkpoint = get_checkpoint(args.checkpoint)
+        args.checkpoint = get_checkpoint(args.checkpoint, model_tag=args.model)
     if args.out is None:
         logging.warning("No output directory. Output will be printed to console.")
     else:
