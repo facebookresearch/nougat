@@ -179,9 +179,9 @@ def train(config):
         )
     trainer = pl.Trainer(
         num_nodes=config.get("num_nodes", 1),
-        devices=torch.cuda.device_count(),
+        devices="auto",
         strategy="ddp_find_unused_parameters_true",
-        accelerator="gpu",
+        accelerator="auto",
         # plugins=[SLURMEnvironment(auto_requeue=False)],
         max_epochs=config.max_epochs,
         max_steps=config.max_steps,
