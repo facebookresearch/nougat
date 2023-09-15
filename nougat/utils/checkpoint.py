@@ -71,8 +71,21 @@ def download_checkpoint(checkpoint: Path, model_tag: str = MODEL_TAG):
             (checkpoint / file).write_bytes(binary_file)
 
 
+def torch_hub(model_tag: Optional[str] = MODEL_TAG) -> Path:
+    old_path = Path(torch.hub.get_dir() + "/nougat")
+    if model_tag is None:
+        model_tag = MODEL_TAG
+    hub_path = old_path.with_name(f"nougat-{model_tag}")
+    if old_path.exists():
+        # move to new format
+        old_path.rename(old_path.with_name("nougat-0.1.0-small"))
+    return hub_path
+
+
 def get_checkpoint(
-    checkpoint_path: Optional[os.PathLike] = None, model_tag: str = MODEL_TAG, download: bool = True
+    checkpoint_path: Optional[os.PathLike] = None,
+    model_tag: str = MODEL_TAG,
+    download: bool = True,
 ) -> Path:
     """
     Get the path to the Nougat model checkpoint.
@@ -92,8 +105,7 @@ def get_checkpoint(
         Path: The path to the Nougat model checkpoint.
     """
     checkpoint = Path(
-        checkpoint_path
-        or os.environ.get("NOUGAT_CHECKPOINT", torch.hub.get_dir() + "/nougat") + "/" + model_tag
+        checkpoint_path or os.environ.get("NOUGAT_CHECKPOINT", torch_hub(model_tag))
     )
     if checkpoint.exists() and checkpoint.is_file():
         checkpoint = checkpoint.parent
