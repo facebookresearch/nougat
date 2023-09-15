@@ -22,12 +22,6 @@ from nougat.utils.checkpoint import get_checkpoint
 from nougat.dataset.rasterize import rasterize_paper
 from tqdm import tqdm
 
-def move_to_device(model):
-    if torch.cuda.is_available():
-        return model.to("cuda")
-    elif torch.backends.mps.is_available():
-        return model.to("mps")
-    return model
 
 SAVE_DIR = Path("./pdfs")
 BATCHSIZE = os.environ.get("NOUGAT_BATCHSIZE", 6)

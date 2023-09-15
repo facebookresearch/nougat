@@ -16,6 +16,7 @@ from torch.utils.data import ConcatDataset
 from tqdm import tqdm
 from nougat import NougatModel
 from nougat.utils.dataset import LazyDataset
+from nougat.utils.device import move_to_device
 from nougat.utils.checkpoint import get_checkpoint
 from nougat.postprocessing import markdown_compatible
 import fitz
@@ -100,13 +101,6 @@ def get_args():
             pass
     return args
 
-
-def move_to_device(model):
-    if torch.cuda.is_available():
-        return model.to("cuda")
-    elif torch.backends.mps.is_available():
-        return model.to("mps")
-    return model
 
 def main():
     args = get_args()
