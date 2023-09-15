@@ -5,7 +5,7 @@ This source code is licensed under the MIT license found in the
 LICENSE file in the root directory of this source tree.
 """
 """
-This script creates an index of all available pages and parses the meta data for all pages into a seperate file.
+This script creates an index of all available pages and parses the meta data for all pages into a separate file.
 Optionally TesseractOCR is called for each image.
 """
 import argparse
