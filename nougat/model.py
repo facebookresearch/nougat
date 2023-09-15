@@ -574,10 +574,6 @@ class NougatModel(PreTrainedModel):
         if self.device.type == "cuda":  # half is not compatible in cpu implementation.
             image_tensors = image_tensors.to(self.device)
 
-        last_hidden_state = self.encoder(image_tensors)
-        if self.device.type != "cuda":
-            last_hidden_state = last_hidden_state.to(torch.float32)
-
         last_hidden_state = self.encoder(image_tensors).to(torch.bfloat16)
         encoder_outputs = ModelOutput(
             last_hidden_state=last_hidden_state, attentions=None
