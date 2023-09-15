@@ -549,6 +549,7 @@ class NougatModel(PreTrainedModel):
         image: Image.Image = None,
         image_tensors: Optional[torch.Tensor] = None,
         return_attentions: bool = False,
+        early_stopping: bool = True
     ):
         """
         Generate a token sequence in an auto-regressive manner.
@@ -571,14 +572,8 @@ class NougatModel(PreTrainedModel):
         if image_tensors is None:
             image_tensors = self.encoder.prepare_input(image).unsqueeze(0)
         image_tensors = image_tensors.to(torch.bfloat16)
-        if self.device.type == "cuda":  # half is not compatible in cpu implementation.
-            image_tensors = image_tensors.to(self.device)
 
         last_hidden_state = self.encoder(image_tensors)
-        if self.device.type != "cuda":
-            last_hidden_state = last_hidden_state.to(torch.float32)
-
-        last_hidden_state = self.encoder(image_tensors).to(torch.bfloat16)
         encoder_outputs = ModelOutput(
             last_hidden_state=last_hidden_state, attentions=None
         )
@@ -603,7 +598,7 @@ class NougatModel(PreTrainedModel):
             output_scores=True,
             output_attentions=return_attentions,
             do_sample=False,
-            stopping_criteria=StoppingCriteriaList([StoppingCriteriaScores()]),
+            stopping_criteria=StoppingCriteriaList([StoppingCriteriaScores()] if early_stopping else []),
         )
         output["repetitions"] = decoder_output.sequences.clone()
         output["sequences"] = decoder_output.sequences.clone()
@@ -631,7 +626,7 @@ class NougatModel(PreTrainedModel):
                 output["repeats"].append(None)
                 continue
             small_var = np.where(varvar < 0.045)[0]
-            if len(small_var) > 1:
+            if early_stopping and len(small_var) > 1:
                 if np.all(np.diff(small_var) < 2):
                     idx = int(min(max(small_var[0], 1) * 1.08 + minlen, 4095))
                     if idx / N > 0.9:  # at most last bit

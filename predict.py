@@ -68,6 +68,12 @@ def get_args():
         action="store_true",
         help="Add postprocessing step for markdown compatibility.",
     )
+    parser.add_argument(
+        "--no-skipping",
+        dest="skipping",
+        action="store_false",
+        help="Don't apply failure detection heuristic.",
+    )
     parser.add_argument("pdf", nargs="+", type=Path, help="PDF(s) to process.")
     args = parser.parse_args()
     if args.checkpoint is None or not args.checkpoint.exists():
@@ -134,7 +140,7 @@ def main():
     file_index = 0
     page_num = 0
     for i, (sample, is_last_page) in enumerate(tqdm(dataloader)):
-        model_output = model.inference(image_tensors=sample)
+        model_output = model.inference(image_tensors=sample, early_stopping=args.skipping)
         # check if model output is faulty
         for j, output in enumerate(model_output["predictions"]):
             if page_num == 0:
@@ -146,7 +152,7 @@ def main():
             if output.strip() == "[MISSING_PAGE_POST]":
                 # uncaught repetitions -- most likely empty page
                 predictions.append(f"\n\n[MISSING_PAGE_EMPTY:{page_num}]\n\n")
-            elif model_output["repeats"][j] is not None:
+            elif args.skipping and model_output["repeats"][j] is not None:
                 if model_output["repeats"][j] > 0:
                     # If we end up here, it means the output is most likely not complete and was truncated.
                     logging.warning(f"Skipping page {page_num} due to repetitions.")

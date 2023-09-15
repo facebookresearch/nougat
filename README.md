@@ -43,7 +43,8 @@ $ nougat path/to/file.pdf -o output_directory
 ```
 
 ```
-usage: nougat [-h] [--batchsize BATCHSIZE] [--checkpoint CHECKPOINT] [--model MODEL_TAG] [--out OUT] [--recompute] [--markdown] pdf [pdf ...]
+usage: nougat [-h] [--batchsize BATCHSIZE] [--checkpoint CHECKPOINT] [--model MODEL] [--out OUT]
+              [--recompute] [--markdown] [--no-skipping] pdf [pdf ...]
 
 positional arguments:
   pdf                   PDF(s) to process.
@@ -59,6 +60,7 @@ options:
   --out OUT, -o OUT     Output directory.
   --recompute           Recompute already computed PDF, discarding previous predictions.
   --markdown            Add postprocessing step for markdown compatibility.
+  --no-skipping         Don't apply failure detection heuristic.
 ```
 
 The default model tag is `0.1.0-small`. If you want to use the base model, use `0.1.0-base`.
@@ -67,6 +69,8 @@ $ nougat path/to/file.pdf -o output_directory -m 0.1.0-base
 ```
 
 In the output directory every PDF will be saved as a `.mmd` file, the lightweight markup language, mostly compatible with [Mathpix Markdown](https://github.com/Mathpix/mathpix-markdown-it) (we make use of the LaTeX tables).
+
+> Note: On some devices the failure detection heuristic is not working properly. If you experience a lot of `[MISSING_PAGE]` responses, try to run with the `--no-skipping` flag. Related: [#11](https://github.com/facebookresearch/nougat/issues/11), [#67](https://github.com/facebookresearch/nougat/issues/67)
 
 #### API
 
