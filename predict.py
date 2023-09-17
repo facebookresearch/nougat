@@ -104,7 +104,7 @@ def get_args():
 
 def main():
     args = get_args()
-    model = NougatModel.from_pretrained(args.checkpoint).to(torch.bfloat16)
+    model = NougatModel.from_pretrained(args.checkpoint)
     if args.batchsize > 0:
         model = move_to_device(model)
     else:
