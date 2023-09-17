@@ -58,7 +58,7 @@ def get_args():
         "--model",
         "-m",
         type=str,
-        default=None,
+        default='0.1.0-small',
         help=f"Model tag to use.",
     )
     parser.add_argument("--out", "-o", type=Path, help="Output directory.")

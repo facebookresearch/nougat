@@ -111,7 +111,7 @@ def get_checkpoint(
         checkpoint = checkpoint.parent
     if download and (not checkpoint.exists() or len(os.listdir(checkpoint)) < 5):
         checkpoint.mkdir(parents=True, exist_ok=True)
-        download_checkpoint(checkpoint, model_tag=model_tag)
+        download_checkpoint(checkpoint, model_tag=model_tag or MODEL_TAG)
     return checkpoint
 
 
