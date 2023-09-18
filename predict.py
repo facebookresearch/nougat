@@ -16,6 +16,7 @@ from torch.utils.data import ConcatDataset
 from tqdm import tqdm
 from nougat import NougatModel
 from nougat.utils.dataset import LazyDataset
+from nougat.utils.device import move_to_device
 from nougat.utils.checkpoint import get_checkpoint
 from nougat.postprocessing import markdown_compatible
 import pypdf
@@ -28,6 +29,9 @@ if torch.cuda.is_available():
     )
     if BATCH_SIZE == 0:
         logging.warning("GPU VRAM is too small. Computing on CPU.")
+elif torch.backends.mps.is_available():
+    # I don't know if there's an equivalent API so heuristically choosing bs=4
+    BATCH_SIZE = 4
 else:
     # don't know what a good value is here. Would not recommend to run on CPU
     BATCH_SIZE = 1
@@ -100,10 +104,9 @@ def get_args():
 
 def main():
     args = get_args()
-    model = NougatModel.from_pretrained(args.checkpoint).to(torch.bfloat16)
+    model = NougatModel.from_pretrained(args.checkpoint)
     if args.batchsize > 0:
-        if torch.cuda.is_available():
-            model.to("cuda")
+        model = move_to_device(model)
     else:
         # set batch size to 1. Need to check if there are benefits for CPU conversion for >1
         args.batchsize = 1

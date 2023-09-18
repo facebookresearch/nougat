@@ -108,6 +108,15 @@ class NougatModelPLModule(pl.LightningModule):
             self.validation_step_outputs.clear()
 
     def configure_optimizers(self):
+
+        def _get_device_count():
+            if torch.cuda.is_available():
+                return torch.cuda.device_count()
+            elif torch.backends.mps.is_available():
+                # Can MPS have more than one device?
+                return 1
+            return 1
+
         max_iter = None
 
         if int(self.config.get("max_epochs", -1)) > 0:
@@ -119,7 +128,7 @@ class NougatModelPLModule(pl.LightningModule):
                 1,
                 (
                     self.config.train_batch_sizes[0]
-                    * torch.cuda.device_count()
+                    * _get_device_count()
                     * self.config.get("num_nodes", 1)
                 ),
             )

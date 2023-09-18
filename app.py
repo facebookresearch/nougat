@@ -21,7 +21,9 @@ from nougat.postprocessing import markdown_compatible, close_envs
 from nougat.utils.dataset import ImageDataset
 from nougat.utils.checkpoint import get_checkpoint
 from nougat.dataset.rasterize import rasterize_paper
+from nougat.utils.device import move_to_device
 from tqdm import tqdm
+
 
 SAVE_DIR = Path("./pdfs")
 BATCHSIZE = os.environ.get("NOUGAT_BATCHSIZE", 6)
@@ -52,8 +54,7 @@ async def load_model(
     global model
     if model is None:
         model = NougatModel.from_pretrained(checkpoint).to(torch.bfloat16)
-        if torch.cuda.is_available():
-            model.to("cuda")
+        model = move_to_device(model)
         model.eval()
 
 
