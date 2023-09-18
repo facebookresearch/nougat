@@ -20,17 +20,12 @@ from nougat import NougatModel
 from nougat.metrics import compute_metrics
 from nougat.utils.checkpoint import get_checkpoint
 from nougat.utils.dataset import NougatDataset
+from nougat.utils.device import move_to_device
 from lightning_module import NougatDataPLModule
 
-def move_to_device(model):
-    if torch.cuda.is_available():
-        return model.to("cuda")
-    elif torch.backends.mps.is_available():
-        return model.to("mps")
-    return model
 
 def test(args):
-    pretrained_model = NougatModel.from_pretrained(args.checkpoint).to(torch.bfloat16)
+    pretrained_model = NougatModel.from_pretrained(args.checkpoint)
     pretrained_model = move_to_device(pretrained_model)
 
     pretrained_model.eval()
