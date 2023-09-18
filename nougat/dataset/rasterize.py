@@ -5,11 +5,11 @@ This source code is licensed under the MIT license found in the
 LICENSE file in the root directory of this source tree.
 """
 import argparse
-import fitz
+import pdf2image
+import pypdf
 from pathlib import Path
 from tqdm import tqdm
 import io
-from PIL import Image
 from typing import Optional, List
 
 
@@ -33,22 +33,32 @@ def rasterize_paper(
     Returns:
         Optional[List[io.BytesIO]]: The PIL images if `return_pil` is True, otherwise None.
     """
-
     pils = []
     if outpath is None:
         return_pil = True
     try:
         if isinstance(pdf, (str, Path)):
-            pdf = fitz.open(pdf)
+            pdf = pypdf.PdfReader(pdf)
         if pages is None:
-            pages = range(len(pdf))
+            pages = range(len(pdf.pages))
         for i in pages:
-            page_bytes: bytes = pdf[i].get_pixmap(dpi=dpi).pil_tobytes(format="PNG")
+            page_bytes = io.BytesIO()
+            writer = pypdf.PdfWriter()
+            writer.add_page(pdf.pages[i])
+            writer.write(page_bytes)
+            page_bytes = page_bytes.getvalue()
+            img = pdf2image.convert_from_bytes(
+                page_bytes,
+                dpi=dpi,
+                fmt="ppm" if outpath is None else "png",
+                output_folder=None if outpath is None else outpath,
+                single_file=True,
+                output_file="%02d" % (i + 1),
+            )[0]
             if return_pil:
-                pils.append(io.BytesIO(page_bytes))
-            else:
-                with (outpath / ("%02d.png" % (i + 1))).open("wb") as f:
-                    f.write(page_bytes)
+                img_bytes = io.BytesIO()
+                img.save(img_bytes, format=img.format)
+                pils.append(img_bytes)
     except Exception:
         pass
     if return_pil:

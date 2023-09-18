@@ -6,6 +6,7 @@ LICENSE file in the root directory of this source tree.
 """
 import os
 import sys
+import io
 from functools import partial
 from http import HTTPStatus
 from fastapi import FastAPI, File, UploadFile
@@ -13,7 +14,7 @@ from PIL import Image
 from pathlib import Path
 import hashlib
 from fastapi.middleware.cors import CORSMiddleware
-import fitz
+import pypdf
 import torch
 from nougat import NougatModel
 from nougat.postprocessing import markdown_compatible, close_envs
@@ -82,14 +83,14 @@ async def predict(
         str: The extracted text in Markdown format.
     """
     pdfbin = file.file.read()
-    pdf = fitz.open("pdf", pdfbin)
+    pdf = pypdf.PdfReader(io.BytesIO(pdfbin))
     md5 = hashlib.md5(pdfbin).hexdigest()
     save_path = SAVE_DIR / md5
 
     if start is not None and stop is not None:
         pages = list(range(start - 1, stop))
     else:
-        pages = list(range(len(pdf)))
+        pages = list(range(len(pdf.pages)))
     predictions = [""] * len(pages)
     dellist = []
     if save_path.exists():
@@ -146,7 +147,7 @@ async def predict(
             )
 
     (save_path / "pages").mkdir(parents=True, exist_ok=True)
-    pdf.save(save_path / "doc.pdf")
+    pypdf.PdfWriter(clone_from=pdf).write(save_path / "doc.pdf")
     if len(images) > 0:
         thumb = Image.open(images[0])
         thumb.thumbnail((400, 400))

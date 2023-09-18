@@ -14,7 +14,7 @@ from typing import Dict, Tuple, Callable
 from PIL import Image, UnidentifiedImageError
 
 import torch
-import fitz
+import pypdf
 import orjson
 from torch.utils.data import Dataset
 from transformers.modeling_utils import PreTrainedModel
@@ -85,7 +85,7 @@ class LazyDataset(Dataset):
         self.name = str(pdf)
         self.init_fn = partial(rasterize_paper, pdf)
         self.dataset = None
-        self.size = len(fitz.open(pdf))
+        self.size = len(pypdf.PdfReader(pdf).pages)
 
     def __len__(self):
         return self.size

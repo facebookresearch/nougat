@@ -13,7 +13,7 @@ from operator import itemgetter
 import re
 from typing import Dict, List, Tuple, Union, Optional
 import os
-import fitz
+import pypdf
 from unidecode import unidecode
 import Levenshtein
 
@@ -29,6 +29,8 @@ from nougat.dataset.splitter import (
     get_glob_index,
 )
 from nougat.dataset.utils import unicode_to_latex, remove_pretty_linebreaks
+from nougat.dataset.utils.pdf_text_extract import get_pages, get_paragraphs
+from nougat.dataset.rasterize import rasterize_paper
 
 
 class BagOfWords:
@@ -131,61 +133,38 @@ def flatten(l: List) -> List:
 
 
 def get_doc_text(
-    doc: fitz.Document,
+    pdf: str,
     splitn: bool = True,
     split_block: bool = True,
     minlen: Optional[int] = 10,
-    return_blocks: bool = True,
 ) -> List[List[str]]:
     """
     Get the text from a PDF document.
 
     Args:
-        doc (fitz.Document): The PDF document.
+        doc (str): Path to the PDF document.
         splitn (bool): Whether to split the text into lines. Defaults to True.
         split_block (bool): Whether to split the text into blocks. Defaults to True.
         minlen (Optional[int]): The minimum length of a line or block. Defaults to 10.
-        return_blocks (bool): Whether to return the block information. Defaults to True.
 
     Returns:
-        List[List[str]]: The text of the PDF document, either as a list of lines or a list of blocks.
-        If `return_blocks` is True, a tuple of (text, block_info) is returned.
+        List[List[str]]: The text of the PDF document, either as a list of lines or a list of blocks..
     """
     document_lines = []
-    block_info = []
-    for i, page in enumerate(doc.pages()):
+    if split_block:
+        pages = get_paragraphs(pdf)
+    else:
+        pages = [get_pages(pdf)]
+    for blocks in pages:
         page_lines = []
-        if split_block:
-            blocks = page.get_text(
-                "blocks", flags=fitz.TEXT_DEHYPHENATE | fitz.TEXT_PRESERVE_IMAGES
-            )
-        else:
-            blocks = [page.get_text()]
-        if return_blocks:
-            for block in blocks:
-                block_info.append(
-                    {
-                        "bbox": block[:4],
-                        "page": i,
-                        "type": "image" if block[-1] else "text",
-                    }
-                )
-
         for block in blocks:
-            if block[-1] == 1:  # image
-                continue
-            block_text = block[-3] if split_block else block
-            if not type(block_text) == str:
-                continue
             if splitn:
-                page_lines.extend(block_text.split("\n"))
+                page_lines.extend(block.split("\n"))
             else:
-                page_lines.append(block_text)
+                page_lines.append(block)
         if splitn:
             page_lines = remove_short_seqs(page_lines, minlen)
         document_lines.append(page_lines)
-    if return_blocks:
-        return document_lines, block_info
     return document_lines
 
 
@@ -254,7 +233,7 @@ def clean_pdf_text(pages: List[List[str]], num_words: int = 10) -> List[List[str
 
 def split_markdown(
     doc: str,
-    pdf: fitz.Document,
+    pdf_file: str,
     figure_info: Optional[List[Dict]] = None,
     doc_fig: Dict[str, str] = {},
     minlen: int = 3,
@@ -267,8 +246,8 @@ def split_markdown(
     Split a PDF document into Markdown paragraphs.
 
     Args:
-        doc (str): The text of the PDF document.
-        pdf (fitz.Document): The PDF document.
+        doc (str): The text of the Markdown document.
+        pdf (str): The PDF document.
         figure_info (Optional[List[Dict]]): A list of dictionaries, where each dictionary
             specifies the information about a figure, such as its caption, page number, and bounding box.
         doc_fig (Dict[str, str]): A dictionary mapping figure ids to LaTeX code.
@@ -281,6 +260,7 @@ def split_markdown(
     Returns:
         Tuple[List[str], Dict]: The list of Markdown paragraphs and the metadata.
     """
+    pdf = pypdf.PdfReader(pdf_file)
     doc_paragraphs_full: List[str] = doc.split("\n")
     doc_paragraph_lengths = [len(p) for p in doc_paragraphs_full if len(p) > 1]
     num_lines = 1 + int(doc_paragraph_chars / np.mean(doc_paragraph_lengths))
@@ -297,9 +277,8 @@ def split_markdown(
             )
             doc_paragraph_indices.append(i)
     meta = {"pdffigures": figure_info}
-    if len(pdf) > 1:
-        pdf_text, block_info = get_doc_text(pdf, True, True, minlen)
-        meta["mupdf"] = block_info
+    if len(pdf.pages) > 1:
+        pdf_text = get_doc_text(pdf_file, True, True, minlen)
         pdf_content = [
             [unicode_to_latex(q).replace("\n", " ") for q in p if len(q) >= minlen]
             for p in pdf_text
@@ -353,7 +332,7 @@ def split_markdown(
             boundaries = (stairs.get_boundaries().astype(int)).tolist()
             boundaries.insert(0, 0)
         else:
-            boundaries = [0] * (len(pdf))
+            boundaries = [0] * (len(pdf.pages))
         splitter = Splitter(doc_paragraphs)
         pages = [(0, 0, 1.0)]
         meta["first_words"] = []
@@ -392,7 +371,7 @@ def split_markdown(
                     delta=delta,
                 )
             )
-    elif len(pdf) == 1:  # single page
+    elif len(pdf.pages) == 1:  # single page
         pages = [(0, 0, 1)]
     else:
         return
@@ -420,13 +399,15 @@ def split_markdown(
 
     meta["page_splits"] = pages
     meta["page_scores"] = page_scores
-    meta["num_pages"] = len(pdf)
+    meta["num_pages"] = len(pdf.pages)
 
     # Reintroduce figures, tables and footnotes
     figure_tex = list(doc_fig.keys()), list(doc_fig.values())
     if len(doc_fig) > 0:
         iterator = figure_info.values() if type(figure_info) == dict else [figure_info]
         for figure_list in iterator:
+            if not figure_list:
+                continue
             for i, f in enumerate(figure_list):
                 if "caption" in f:
                     fig_string = f["caption"]
@@ -472,7 +453,7 @@ if __name__ == "__main__":
     parser.add_argument("--dpi", type=int, default=96)
     args = parser.parse_args()
     md = open(args.md, "r", encoding="utf-8").read().replace("\xa0", " ")
-    pdf = fitz.open(args.pdf)
+    pdf = pypdf.PdfReader(args.pdf)
     try:
         fig_info = json.load(open(args.figure, "r", encoding="utf-8"))
     except FileNotFoundError:
@@ -481,6 +462,7 @@ if __name__ == "__main__":
     if args.out:
         outpath = os.path.join(args.out, os.path.basename(args.pdf).partition(".")[0])
         os.makedirs(outpath, exist_ok=True)
+        found_pages = []
         for i, content in enumerate(pages):
             if content:
                 with open(
@@ -491,6 +473,5 @@ if __name__ == "__main__":
                     encoding="utf-8",
                 ) as f:
                     f.write(content)
-
-                with open(os.path.join(outpath, "%02d.png" % (i + 1)), "wb") as f:
-                    f.write(pdf[i].get_pixmap(dpi=args.dpi).pil_tobytes(format="PNG"))
+                found_pages.append(i)
+        rasterize_paper(pdf, outpath, dpi=args.dpi, pages=found_pages)

@@ -54,7 +54,8 @@ setup(
         "sentencepiece",
         "sconf>=0.2.3",
         "albumentations",
-        "pymupdf",
+        "pypdf>=3.1.0",
+        "pdf2image",
     ],
     extras_require={
         "api": [
@@ -71,6 +72,7 @@ setup(
             "fuzzysearch",
             "unidecode",
             "htmlmin",
+            "pdfminer.six>=20221105"
         ],
     },
     entry_points={

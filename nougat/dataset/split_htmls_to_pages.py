@@ -14,7 +14,8 @@ from typing import Tuple
 import os
 from pathlib import Path
 import logging
-import fitz
+import pypdf
+from PIL import Image
 import pytesseract
 from nougat.dataset.split_md_to_pages import *
 from nougat.dataset.parser.html2md import *
@@ -48,8 +49,8 @@ def process_paper(
     total_pages = 0
     num_recognized_pages = 0
     try:
-        pdf = fitz.open(pdf_file)
-        total_pages = len(pdf)
+        pdf = pypdf.PdfReader(pdf_file)
+        total_pages = len(pdf.pages)
         outpath: Path = args.out / fname
         # skip this paper if already processed
         dirs_with_same_stem = list(args.out.glob(fname.partition("v")[0] + "*"))
@@ -62,7 +63,7 @@ def process_paper(
                 "%s (or another version thereof) already processed. Skipping paper",
                 fname,
             )
-            return len(pdf), len(list(outpath.glob("*.mmd")))
+            return total_pages, len(list(outpath.glob("*.mmd")))
         html = BeautifulSoup(
             htmlmin.minify(
                 open(html_file, "r", encoding="utf-8").read().replace("\xa0", " "),
@@ -87,7 +88,7 @@ def process_paper(
         else:
             figure_info = None
         split = split_markdown(
-            out, pdf, figure_info=figure_info, doc_fig=fig, min_score=0.9
+            out, pdf_file, figure_info=figure_info, doc_fig=fig, min_score=0.9
         )
         if split is None:
             return
@@ -96,6 +97,7 @@ def process_paper(
         if all([len(p) == 0 for p in pages]):
             return
         os.makedirs(outpath, exist_ok=True)
+        recognized_indices = []
         for i, content in enumerate(pages):
             with (outpath / "meta.json").open("w", encoding="utf-8") as f:
                 f.write(json.dumps(meta))
@@ -107,20 +109,18 @@ def process_paper(
                     "w", encoding="utf-8"
                 ) as f:
                     f.write(content)
-                with (outpath / ("%02d.png" % (i + 1))).open("wb") as f:
-                    page_bytes: bytes = (
-                        pdf[i].get_pixmap(dpi=args.dpi).pil_tobytes(format="PNG")
-                    )
-                    f.write(page_bytes)
-                if args.tesseract:
-                    ocr = pytesseract.image_to_string(
-                        Image.open(BytesIO(page_bytes)), lang="eng"
-                    )
-                    ocr = re.sub(r"\n+\s+?([^\s])", r"\n\n\1", ocr).strip()
-                    with (outpath / ("%02d_OCR.txt" % (i + 1))).open(
-                        "w", encoding="utf-8"
-                    ) as f_ocr:
-                        f_ocr.write(ocr)
+                recognized_indices.append(i)
+        rasterize_paper(pdf_file, outpath, dpi=args.dpi, pages=recognized_indices)
+        if args.tesseract:
+            for i in recognized_indices:
+                ocr = pytesseract.image_to_string(
+                    Image.open((outpath / ("%02d.png" % (i + 1)))), lang="eng"
+                )
+                ocr = re.sub(r"\n+\s+?([^\s])", r"\n\n\1", ocr).strip()
+                with (outpath / ("%02d_OCR.txt" % (i + 1))).open(
+                    "w", encoding="utf-8"
+                ) as f_ocr:
+                    f_ocr.write(ocr)
     except Exception as e:
         logger.error(e)
 

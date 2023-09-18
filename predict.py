@@ -18,7 +18,7 @@ from nougat import NougatModel
 from nougat.utils.dataset import LazyDataset
 from nougat.utils.checkpoint import get_checkpoint
 from nougat.postprocessing import markdown_compatible
-import fitz
+import pypdf
 
 logging.basicConfig(level=logging.INFO)
 
@@ -123,7 +123,7 @@ def main():
             dataset = LazyDataset(
                 pdf, partial(model.encoder.prepare_input, random_padding=False)
             )
-        except fitz.fitz.FileDataError:
+        except pypdf.errors.PdfStreamError:
             logging.info(f"Could not load file {str(pdf)}.")
             continue
         datasets.append(dataset)

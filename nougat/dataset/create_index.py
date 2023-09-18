@@ -51,15 +51,7 @@ def read_metadata(data: Dict) -> List[List[Dict]]:
             if "captionBoundary" in item:
                 item["captionBoundary"] = convert_pt2px(item["captionBoundary"])
             out[p].append(item)
-    # Save mupdf meta data (not needed)
-    # if "mupdf" in data:
-    #     for block in data["mupdf"]:
-    #         p = block.pop("page", None)
-    #         if p is None or p >= N:
-    #             continue
-    #         block["source"] = "mu"
-    #         block["bbox"] = convert_pt2px(block["bbox"])
-    #         out[p].append(block)
+
     return out
 
 
