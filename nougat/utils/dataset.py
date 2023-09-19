@@ -57,11 +57,11 @@ class ImageDataset(torch.utils.data.Dataset):
             pass
 
     def __getitem__(self, idx):
-        try:
-            img = Image.open(self.img_list[idx])
-            return self.prepare(img)
-        except:
-            return
+        # try:
+        img = Image.open(self.img_list[idx])
+        return self.prepare(img)
+        # except Exception as e:
+        #     logging.error(e)
 
 
 class LazyDataset(Dataset):
@@ -101,7 +101,7 @@ class LazyDataset(Dataset):
     @staticmethod
     def ignore_none_collate(batch):
         if batch is None:
-            return
+            return None, None
         try:
             _batch = []
             for i, x in enumerate(batch):
@@ -114,10 +114,11 @@ class LazyDataset(Dataset):
                     elif len(batch) > 1:
                         _batch.append((batch[1][0] * 0, name))
             if len(_batch) == 0:
-                return
+                return None, None
             return torch.utils.data.dataloader.default_collate(_batch)
         except AttributeError:
             pass
+        return None, None
 
 
 class SciPDFDataset(Dataset):
