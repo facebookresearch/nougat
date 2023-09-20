@@ -5,8 +5,7 @@ This source code is licensed under the MIT license found in the
 LICENSE file in the root directory of this source tree.
 """
 import argparse
-import pdf2image
-import pypdf
+import pypdfium2
 from pathlib import Path
 from tqdm import tqdm
 import io
@@ -38,27 +37,21 @@ def rasterize_paper(
         return_pil = True
     try:
         if isinstance(pdf, (str, Path)):
-            pdf = pypdf.PdfReader(pdf)
+            pdf = pypdfium2.PdfDocument(pdf)
         if pages is None:
-            pages = range(len(pdf.pages))
-        for i in pages:
-            page_bytes = io.BytesIO()
-            writer = pypdf.PdfWriter()
-            writer.add_page(pdf.pages[i])
-            writer.write(page_bytes)
-            page_bytes = page_bytes.getvalue()
-            img = pdf2image.convert_from_bytes(
-                page_bytes,
-                dpi=dpi,
-                fmt="ppm" if outpath is None else "png",
-                output_folder=None if outpath is None else outpath,
-                single_file=True,
-                output_file="%02d" % (i + 1),
-            )[0]
+            pages = range(len(pdf))
+        renderer = pdf.render(
+            pypdfium2.PdfBitmap.to_pil,
+            page_indices=pages,
+            scale=dpi / 72,
+        )
+        for i, image in zip(pages, renderer):
             if return_pil:
-                img_bytes = io.BytesIO()
-                img.save(img_bytes, format=img.format)
-                pils.append(img_bytes)
+                page_bytes = io.BytesIO()
+                image.save(page_bytes, "bmp")
+                pils.append(page_bytes)
+            else:
+                image.save((outpath / ("%02d.png" % (i + 1))), "png")
     except Exception:
         pass
     if return_pil:
