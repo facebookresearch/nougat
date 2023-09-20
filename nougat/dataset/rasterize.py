@@ -15,7 +15,7 @@ from typing import Optional, List
 logging.getLogger("pypdfium2").setLevel(logging.WARNING)
 
 def rasterize_paper(
-    pdf: Path,
+    pdf: Path | bytes,
     outpath: Optional[Path] = None,
     dpi: int = 96,
     return_pil=False,
@@ -54,8 +54,8 @@ def rasterize_paper(
                 pils.append(page_bytes)
             else:
                 image.save((outpath / ("%02d.png" % (i + 1))), "png")
-    except Exception:
-        pass
+    except Exception as e:
+        logging.error(e)
     if return_pil:
         return pils
 
