@@ -140,3 +140,6 @@ dmypy.json
 .pyre/
 
 ckpt*/
+
+# Misc
+pdfs
