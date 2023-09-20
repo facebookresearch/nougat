@@ -5,12 +5,14 @@ This source code is licensed under the MIT license found in the
 LICENSE file in the root directory of this source tree.
 """
 import argparse
+import logging
 import pypdfium2
 from pathlib import Path
 from tqdm import tqdm
 import io
 from typing import Optional, List
 
+logging.getLogger("pypdfium2").setLevel(logging.WARNING)
 
 def rasterize_paper(
     pdf: Path,

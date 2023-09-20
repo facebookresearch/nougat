@@ -57,11 +57,11 @@ class ImageDataset(torch.utils.data.Dataset):
             pass
 
     def __getitem__(self, idx):
-        # try:
-        img = Image.open(self.img_list[idx])
-        return self.prepare(img)
-        # except Exception as e:
-        #     logging.error(e)
+        try:
+            img = Image.open(self.img_list[idx])
+            return self.prepare(img)
+        except Exception as e:
+            logging.error(e)
 
 
 class LazyDataset(Dataset):
