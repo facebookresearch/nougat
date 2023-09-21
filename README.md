@@ -14,6 +14,10 @@ This is the official repository for Nougat, the academic document PDF parser tha
 
 Project page: https://facebookresearch.github.io/nougat/
 
+## Minimum Requirements
+
+- Python 3.10
+
 ## Install
 
 From pip:
