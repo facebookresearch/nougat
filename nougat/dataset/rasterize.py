@@ -14,6 +14,7 @@ from typing import Optional, List, Union
 
 logging.getLogger("pypdfium2").setLevel(logging.WARNING)
 
+
 def rasterize_paper(
     pdf: Union[Path, bytes],
     outpath: Optional[Path] = None,

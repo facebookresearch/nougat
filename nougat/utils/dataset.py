@@ -12,6 +12,7 @@ from functools import partial
 import random
 from typing import Dict, Tuple, Callable
 from PIL import Image, UnidentifiedImageError
+from typing import List, Optional
 
 import torch
 import pypdf
@@ -79,13 +80,13 @@ class LazyDataset(Dataset):
         name (str): Name of the PDF document.
     """
 
-    def __init__(self, pdf, prepare: Callable):
+    def __init__(self, pdf, prepare: Callable, pages: Optional[List[int]] = None):
         super().__init__()
         self.prepare = prepare
         self.name = str(pdf)
-        self.init_fn = partial(rasterize_paper, pdf)
+        self.init_fn = partial(rasterize_paper, pdf, pages=pages)
         self.dataset = None
-        self.size = len(pypdf.PdfReader(pdf).pages)
+        self.size = len(pypdf.PdfReader(pdf).pages) if pages is None else len(pages)
 
     def __len__(self):
         return self.size

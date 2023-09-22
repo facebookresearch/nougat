@@ -549,7 +549,7 @@ class NougatModel(PreTrainedModel):
         image: Image.Image = None,
         image_tensors: Optional[torch.Tensor] = None,
         return_attentions: bool = False,
-        early_stopping: bool = True
+        early_stopping: bool = True,
     ):
         """
         Generate a token sequence in an auto-regressive manner.
@@ -602,7 +602,9 @@ class NougatModel(PreTrainedModel):
             output_scores=True,
             output_attentions=return_attentions,
             do_sample=False,
-            stopping_criteria=StoppingCriteriaList([StoppingCriteriaScores()] if early_stopping else []),
+            stopping_criteria=StoppingCriteriaList(
+                [StoppingCriteriaScores()] if early_stopping else []
+            ),
         )
         output["repetitions"] = decoder_output.sequences.clone()
         output["sequences"] = decoder_output.sequences.clone()

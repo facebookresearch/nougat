@@ -58,7 +58,7 @@ def get_args():
         "--model",
         "-m",
         type=str,
-        default='0.1.0-small',
+        default="0.1.0-small",
         help=f"Model tag to use.",
     )
     parser.add_argument("--out", "-o", type=Path, help="Output directory.")
@@ -77,6 +77,12 @@ def get_args():
         dest="skipping",
         action="store_false",
         help="Don't apply failure detection heuristic.",
+    )
+    parser.add_argument(
+        "--pages",
+        "-p",
+        type=str,
+        help="Provide page numbers like '1-4,7' for pages 1 through 4 and page 7. Only works for single PDF input.",
     )
     parser.add_argument("pdf", nargs="+", type=Path, help="PDF(s) to process.")
     args = parser.parse_args()
@@ -99,6 +105,17 @@ def get_args():
             ]
         except:
             pass
+    if args.pages and len(args.pdf) == 1:
+        pages = []
+        for p in args.pages.split(","):
+            if "-" in p:
+                start, end = p.split("-")
+                pages.extend(range(int(start)-1, int(end)))
+            else:
+                pages.append(int(p)-1)
+        args.pages = pages
+    else:
+        args.pages = None
     return args
 
 
@@ -124,7 +141,9 @@ def main():
                 continue
         try:
             dataset = LazyDataset(
-                pdf, partial(model.encoder.prepare_input, random_padding=False)
+                pdf,
+                partial(model.encoder.prepare_input, random_padding=False),
+                args.pages,
             )
         except pypdf.errors.PdfStreamError:
             logging.info(f"Could not load file {str(pdf)}.")
@@ -143,7 +162,9 @@ def main():
     file_index = 0
     page_num = 0
     for i, (sample, is_last_page) in enumerate(tqdm(dataloader)):
-        model_output = model.inference(image_tensors=sample, early_stopping=args.skipping)
+        model_output = model.inference(
+            image_tensors=sample, early_stopping=args.skipping
+        )
         # check if model output is faulty
         for j, output in enumerate(model_output["predictions"]):
             if page_num == 0:

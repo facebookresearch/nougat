@@ -72,7 +72,7 @@ setup(
             "fuzzysearch",
             "unidecode",
             "htmlmin",
-            "pdfminer.six>=20221105"
+            "pdfminer.six>=20221105",
         ],
     },
     entry_points={

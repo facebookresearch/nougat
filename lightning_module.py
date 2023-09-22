@@ -108,7 +108,6 @@ class NougatModelPLModule(pl.LightningModule):
             self.validation_step_outputs.clear()
 
     def configure_optimizers(self):
-
         def _get_device_count():
             if torch.cuda.is_available():
                 return torch.cuda.device_count()
