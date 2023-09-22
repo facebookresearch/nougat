@@ -61,6 +61,8 @@ options:
   --recompute           Recompute already computed PDF, discarding previous predictions.
   --markdown            Add postprocessing step for markdown compatibility.
   --no-skipping         Don't apply failure detection heuristic.
+  --pages PAGES, -p PAGES
+                        Provide page numbers like '1-4,7' for pages 1 through 4 and page 7. Only works for single PDFs.
 ```
 
 The default model tag is `0.1.0-small`. If you want to use the base model, use `0.1.0-base`.
