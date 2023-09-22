@@ -10,12 +10,12 @@ import pypdfium2
 from pathlib import Path
 from tqdm import tqdm
 import io
-from typing import Optional, List
+from typing import Optional, List, Union
 
 logging.getLogger("pypdfium2").setLevel(logging.WARNING)
 
 def rasterize_paper(
-    pdf: Path | bytes,
+    pdf: Union[Path, bytes],
     outpath: Optional[Path] = None,
     dpi: int = 96,
     return_pil=False,
