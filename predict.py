@@ -16,26 +16,12 @@ from torch.utils.data import ConcatDataset
 from tqdm import tqdm
 from nougat import NougatModel
 from nougat.utils.dataset import LazyDataset
-from nougat.utils.device import move_to_device
+from nougat.utils.device import move_to_device, default_batch_size
 from nougat.utils.checkpoint import get_checkpoint
 from nougat.postprocessing import markdown_compatible
 import pypdf
 
 logging.basicConfig(level=logging.INFO)
-
-if torch.cuda.is_available():
-    BATCH_SIZE = int(
-        torch.cuda.get_device_properties(0).total_memory / 1024 / 1024 / 1000 * 0.3
-    )
-    if BATCH_SIZE == 0:
-        logging.warning("GPU VRAM is too small. Computing on CPU.")
-elif torch.backends.mps.is_available():
-    # I don't know if there's an equivalent API so heuristically choosing bs=4
-    BATCH_SIZE = 4
-else:
-    # don't know what a good value is here. Would not recommend to run on CPU
-    BATCH_SIZE = 1
-    logging.warning("No GPU found. Conversion on CPU is very slow.")
 
 
 def get_args():
@@ -44,7 +30,7 @@ def get_args():
         "--batchsize",
         "-b",
         type=int,
-        default=BATCH_SIZE,
+        default=default_batch_size(),
         help="Batch size to use.",
     )
     parser.add_argument(
@@ -110,9 +96,9 @@ def get_args():
         for p in args.pages.split(","):
             if "-" in p:
                 start, end = p.split("-")
-                pages.extend(range(int(start)-1, int(end)))
+                pages.extend(range(int(start) - 1, int(end)))
             else:
-                pages.append(int(p)-1)
+                pages.append(int(p) - 1)
         args.pages = pages
     else:
         args.pages = None

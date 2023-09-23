@@ -20,12 +20,12 @@ from nougat.postprocessing import markdown_compatible, close_envs
 from nougat.utils.dataset import ImageDataset
 from nougat.utils.checkpoint import get_checkpoint
 from nougat.dataset.rasterize import rasterize_paper
-from nougat.utils.device import move_to_device
+from nougat.utils.device import move_to_device, default_batch_size
 from tqdm import tqdm
 
 
 SAVE_DIR = Path("./pdfs")
-BATCHSIZE = os.environ.get("NOUGAT_BATCHSIZE", 6)
+BATCHSIZE = os.environ.get("NOUGAT_BATCHSIZE", default_batch_size())
 NOUGAT_CHECKPOINT = get_checkpoint()
 if NOUGAT_CHECKPOINT is None:
     print(
@@ -52,7 +52,7 @@ async def load_model(
 ):
     global model
     if model is None:
-        model = NougatModel.from_pretrained(checkpoint).to(torch.bfloat16)
+        model = NougatModel.from_pretrained(checkpoint)
         model = move_to_device(model)
         model.eval()
 
