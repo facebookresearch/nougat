@@ -93,11 +93,11 @@ def get_args():
                 args.pdf = [
                     Path(p) for p in glob.glob(f"{pdfs_path}/**/*.pdf", recursive=True)
                 ]
-                logging.info(f"Found {len(args.pdf)} files.")
             else:
                 args.pdf = [
                     Path(l) for l in open(pdfs_path).read().split("\n") if len(l) > 0
                 ]
+            logging.info(f"Found {len(args.pdf)} files.")
         except:
             pass
     if args.pages and len(args.pdf) == 1:
