@@ -71,8 +71,9 @@ def find_next_punctuation(s: str, start_inx=0):
         start_inx: Index where to start
     """
 
-    for i in range(start_inx, len(s)):
-        if s[i] in [".", "?", "!", "\n"]:
+    chars_to_find = {".", "?", "!", "\n"}
+    for i, char in enumerate(s[start_inx:], start=start_inx):
+        if char in chars_to_find:
             return i
 
     return None
@@ -87,8 +88,9 @@ def find_last_punctuation(s: str, start_inx=0):
         start_inx: Index where to look before
     """
 
-    for i in range(start_inx - 1, 0, -1):
-        if s[i] in [".", "?", "!", "\n"]:
+    chars_to_find = {".", "?", "!", "\n"}
+    for i, char in enumerate(s[start_inx::-1], start=start_inx):
+        if char in chars_to_find:
             return i
 
     return None
