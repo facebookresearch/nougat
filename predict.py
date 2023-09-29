@@ -10,6 +10,7 @@ import logging
 import re
 import argparse
 import re
+import os
 from functools import partial
 import torch
 from torch.utils.data import ConcatDataset
@@ -86,9 +87,14 @@ def get_args():
     if len(args.pdf) == 1 and not args.pdf[0].suffix == ".pdf":
         # input is a list of pdfs
         try:
-            args.pdf = [
-                Path(l) for l in open(args.pdf[0]).read().split("\n") if len(l) > 0
-            ]
+            pdfs_path = args.pdf[0]
+            if pdfs_path.is_dir():
+                args.pdf = list(pdfs_path.rglob("*.pdf"))
+            else:
+                args.pdf = [
+                    Path(l) for l in open(pdfs_path).read().split("\n") if len(l) > 0
+                ]
+            logging.info(f"Found {len(args.pdf)} files.")
         except:
             pass
     if args.pages and len(args.pdf) == 1:
