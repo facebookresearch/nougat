@@ -11,7 +11,6 @@ import re
 import argparse
 import re
 import os
-import glob
 from functools import partial
 import torch
 from torch.utils.data import ConcatDataset
@@ -89,10 +88,8 @@ def get_args():
         # input is a list of pdfs
         try:
             pdfs_path = args.pdf[0]
-            if os.path.isdir(pdfs_path):
-                args.pdf = [
-                    Path(p) for p in glob.glob(f"{pdfs_path}/**/*.pdf", recursive=True)
-                ]
+            if pdfs_path.is_dir():
+                args.pdf = list(pdfs_path.rglob("*.pdf"))
             else:
                 args.pdf = [
                     Path(l) for l in open(pdfs_path).read().split("\n") if len(l) > 0
