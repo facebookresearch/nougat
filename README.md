@@ -36,10 +36,16 @@ Install via
 ### Get prediction for a PDF
 #### CLI
 
-To get predictions for a PDF run 
+To get predictions for a PDF run
 
 ```
 $ nougat path/to/file.pdf -o output_directory
+```
+
+A path to a directory or to a file where each line is a path to a PDF can also be passed as a positional argument
+
+```
+$ nougat path/to/directory -o output_directory
 ```
 
 ```
