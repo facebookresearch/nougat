@@ -65,7 +65,9 @@ options:
                         Model tag to use.
   --out OUT, -o OUT     Output directory.
   --recompute           Recompute already computed PDF, discarding previous predictions.
-  --markdown            Add postprocessing step for markdown compatibility.
+  --full-precision      Use float32 instead of bfloat16. Can speed up CPU conversion for some setups.
+  --no-markdown         Do not add postprocessing step for markdown compatibility.
+  --markdown            Add postprocessing step for markdown compatibility (default).
   --no-skipping         Don't apply failure detection heuristic.
   --pages PAGES, -p PAGES
                         Provide page numbers like '1-4,7' for pages 1 through 4 and page 7. Only works for single PDFs.

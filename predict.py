@@ -60,9 +60,15 @@ def get_args():
         help="Use float32 instead of bfloat16. Can speed up CPU conversion for some setups.",
     )
     parser.add_argument(
+        "--no-markdown",
+        dest="markdown",
+        action="store_false",
+        help="Do not add postprocessing step for markdown compatibility.",
+    )
+    parser.add_argument(
         "--markdown",
         action="store_true",
-        help="Add postprocessing step for markdown compatibility.",
+        help="Add postprocessing step for markdown compatibility (default).",
     )
     parser.add_argument(
         "--no-skipping",
