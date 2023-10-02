@@ -25,12 +25,14 @@ def default_batch_size():
     return batch_size
 
 
-def move_to_device(model):
-    if torch.cuda.is_available():
-        return model.to("cuda").to(torch.bfloat16)
+def move_to_device(model, bf16: bool = True, cuda: bool = True):
     try:
         if torch.backends.mps.is_available():
             return model.to("mps")
     except AttributeError:
         pass
-    return model.to(torch.bfloat16)
+    if bf16:
+        return model.to(torch.bfloat16)
+    if cuda and torch.cuda.is_available():
+        model = model.to("cuda")
+    return model

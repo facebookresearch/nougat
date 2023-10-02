@@ -54,6 +54,11 @@ def get_args():
         help="Recompute already computed PDF, discarding previous predictions.",
     )
     parser.add_argument(
+        "--full-precision",
+        action="store_true",
+        help="Use float32 instead of bfloat16. Can speed up CPU conversion for some setups.",
+    )
+    parser.add_argument(
         "--markdown",
         action="store_true",
         help="Add postprocessing step for markdown compatibility.",
@@ -108,9 +113,8 @@ def get_args():
 def main():
     args = get_args()
     model = NougatModel.from_pretrained(args.checkpoint)
-    if args.batchsize > 0:
-        model = move_to_device(model)
-    else:
+    model = move_to_device(model, bf16=not args.full_precision, cuda=args.batchsize > 0)
+    if args.batchsize <= 0:
         # set batch size to 1. Need to check if there are benefits for CPU conversion for >1
         args.batchsize = 1
     model.eval()
