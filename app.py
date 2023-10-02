@@ -25,11 +25,11 @@ from tqdm import tqdm
 
 
 SAVE_DIR = Path("./pdfs")
-BATCHSIZE = os.environ.get("NOUGAT_BATCHSIZE", default_batch_size())
+BATCHSIZE = int(os.environ.get("NOUGAT_BATCHSIZE", default_batch_size()))
 NOUGAT_CHECKPOINT = get_checkpoint()
 if NOUGAT_CHECKPOINT is None:
     print(
-        "Set environment variable 'NOUGAT_CHECKPOINT' with a path to the model checkpoint!."
+        "Set environment variable 'NOUGAT_CHECKPOINT' with a path to the model checkpoint!"
     )
     sys.exit(1)
 
@@ -50,10 +50,12 @@ model = None
 async def load_model(
     checkpoint: str = NOUGAT_CHECKPOINT,
 ):
-    global model
+    global model, BATCHSIZE
     if model is None:
         model = NougatModel.from_pretrained(checkpoint)
-        model = move_to_device(model)
+        model = move_to_device(model, cuda=BATCHSIZE > 0)
+        if BATCHSIZE <= 0:
+            BATCHSIZE = 1
         model.eval()
 
 
