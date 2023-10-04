@@ -32,7 +32,7 @@ def move_to_device(model, bf16: bool = True, cuda: bool = True):
     except AttributeError:
         pass
     if bf16:
-        return model.to(torch.bfloat16)
+        model = model.to(torch.bfloat16)
     if cuda and torch.cuda.is_available():
         model = model.to("cuda")
     return model
