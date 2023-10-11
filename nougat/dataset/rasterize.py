@@ -16,7 +16,7 @@ logging.getLogger("pypdfium2").setLevel(logging.WARNING)
 
 
 def rasterize_paper(
-    pdf: Union[Path, bytes],
+    pdf: Union[Path, bytes, pypdfium2.PdfDocument],
     outpath: Optional[Path] = None,
     dpi: int = 96,
     return_pil=False,
@@ -26,7 +26,8 @@ def rasterize_paper(
     Rasterize a PDF file to PNG images.
 
     Args:
-        pdf (Path): The path to the PDF file.
+        pdf (Union[Path, bytes, pypdfium2.PdfDocument]): If a Path or bytes are passed, then a new PdfDocument will be created.
+            Otherwise, the provided PdfDocument will be used directly.
         outpath (Optional[Path], optional): The output directory. If None, the PIL images will be returned instead. Defaults to None.
         dpi (int, optional): The output DPI. Defaults to 96.
         return_pil (bool, optional): Whether to return the PIL images instead of writing them to disk. Defaults to False.
@@ -39,7 +40,7 @@ def rasterize_paper(
     if outpath is None:
         return_pil = True
     try:
-        if isinstance(pdf, (str, Path)):
+        if isinstance(pdf, (str, Path, bytes)):
             pdf = pypdfium2.PdfDocument(pdf)
         if pages is None:
             pages = range(len(pdf))
