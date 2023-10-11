@@ -2,6 +2,7 @@ core.*
 *.bin
 .nfs*
 .vscode/*
+.idea/*
 result/*
 !result/extract.py
 misc/*
