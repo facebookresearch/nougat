@@ -2,6 +2,7 @@ resume_from_checkpoint_path: null
 result_path: "result"
 model_path: null
 dataset_paths: ["path/to/train.jsonl"]
+datasets_root: "paired/output"
 tokenizer: "dataset/tokenizer.json"
 exp_name: "nougat"
 train_batch_sizes: [1]
