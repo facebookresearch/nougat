@@ -154,6 +154,7 @@ def train(config):
                     nougat_model=model_module.model,
                     max_length=config.max_length,
                     split=split,
+                    root_name=config.datasets_root
                 )
             )
     data_module.train_datasets = datasets["train"]
