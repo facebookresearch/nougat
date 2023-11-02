@@ -41,7 +41,7 @@ def read_metadata(data: Dict) -> List[List[Dict]]:
     out = [[] for _ in range(N)]
     # pdffigures2 meta data
     if "pdffigures" in data and data["pdffigures"]:
-        for item in data["pdffigures"]:
+        for item in data["pdffigures"]["figures"]:
             p = item.pop("page", None)
             if p is None or p >= N:
                 continue
