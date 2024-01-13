@@ -266,7 +266,7 @@ class BARTDecoder(nn.Module):
                     ]
                 else:
                     new_bart_state_dict[x] = bart_state_dict[x]
-            self.model.load_state_dict(new_bart_state_dict, strict=False)
+            self.model.load_state_dict(new_bart_state_dict)
 
     def add_special_tokens(self, list_of_tokens: List[str]):
         """
