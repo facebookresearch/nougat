@@ -82,6 +82,12 @@ def get_args():
         type=str,
         help="Provide page numbers like '1-4,7' for pages 1 through 4 and page 7. Only works for single PDF input.",
     )
+    parser.add_argument(
+        "--device-index",
+        type=int,
+        default=0,
+        help="Index of the preferred GPU device.",
+    )
     parser.add_argument("pdf", nargs="+", type=Path, help="PDF(s) to process.")
     args = parser.parse_args()
     if args.checkpoint is None or not args.checkpoint.exists():
@@ -125,7 +131,7 @@ def get_args():
 def main():
     args = get_args()
     model = NougatModel.from_pretrained(args.checkpoint)
-    model = move_to_device(model, bf16=not args.full_precision, cuda=args.batchsize > 0)
+    model = move_to_device(model, bf16=not args.full_precision, cuda=args.batchsize > 0, device_index=args.device_index)
     if args.batchsize <= 0:
         # set batch size to 1. Need to check if there are benefits for CPU conversion for >1
         args.batchsize = 1
