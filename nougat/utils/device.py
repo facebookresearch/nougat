@@ -35,15 +35,3 @@ def move_to_device(model, bf16: bool = True, cuda: bool = True, device_index: in
    if cuda and torch.cuda.is_available():
        model = model.to(f"cuda:{device_index}")
    return model
-
-# def move_to_device(model, bf16: bool = True, cuda: bool = True):
-#     try:
-#         if torch.backends.mps.is_available():
-#             return model.to("mps")
-#     except AttributeError:
-#         pass
-#     if bf16:
-#         model = model.to(torch.bfloat16)
-#     if cuda and torch.cuda.is_available():
-#         model = model.to("cuda")
-#     return model
