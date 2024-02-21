@@ -42,6 +42,13 @@ def get_args():
         help="Path to checkpoint directory.",
     )
     parser.add_argument(
+        "--dpi",
+        "-d",
+        type=int,
+        default=96,
+        help="Resolution to use when rasterizing PDFs to images",
+    )
+    parser.add_argument(
         "--model",
         "-m",
         type=str,
@@ -146,6 +153,7 @@ def main():
                 pdf,
                 partial(model.encoder.prepare_input, random_padding=False),
                 args.pages,
+                dpi=args.dpi,
             )
         except pypdf.errors.PdfStreamError:
             logging.info(f"Could not load file {str(pdf)}.")
