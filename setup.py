@@ -43,7 +43,7 @@ setup(
     py_modules=["predict", "app", "train", "test"],
     python_requires=">=3.7",
     install_requires=[
-        "transformers>=4.25.1",
+        "transformers>=4.25.1,<=4.38.2",
         "timm==0.5.4",
         "orjson",
         "opencv-python-headless",
