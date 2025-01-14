@@ -15,6 +15,11 @@ This is the official repository for Nougat, the academic document PDF parser tha
 Project page: https://facebookresearch.github.io/nougat/
 
 ## Install
+From uv:
+```
+curl -LsSf https://astral.sh/uv/install.sh | sh
+uv sync
+```
 
 From pip:
 ```
@@ -32,11 +37,6 @@ There are extra dependencies if you want to call the model from an API or genera
 Install via
 
 `pip install "nougat-ocr[api]"` or `pip install "nougat-ocr[dataset]"`
-
- Note: If you encounter a validation error, run below:
-```
-pip install albumentations==1.0.0
-```
 
 ### Get prediction for a PDF
 #### CLI
