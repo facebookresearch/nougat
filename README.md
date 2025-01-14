@@ -33,6 +33,11 @@ Install via
 
 `pip install "nougat-ocr[api]"` or `pip install "nougat-ocr[dataset]"`
 
+ Note: If you encounter a validation error, run below:
+```
+pip install albumentations==1.0.0
+```
+
 ### Get prediction for a PDF
 #### CLI
 
