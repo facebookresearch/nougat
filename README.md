@@ -16,8 +16,13 @@ Project page: https://facebookresearch.github.io/nougat/
 
 ## Install
 From uv:
+
+Install uv
 ```
 curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+Then, install nougat
+```
 uv sync
 ```
 
