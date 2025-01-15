@@ -3,7 +3,7 @@ name = "nougat"
 version = "0.1.0"
 description = "version is locked by uv"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.9"
 dependencies = [
     "albumentations==1.0.0",
     "nougat-ocr>=0.1.17",
