@@ -50,6 +50,7 @@ To get predictions for a PDF run
 
 ```
 $ nougat path/to/file.pdf -o output_directory
+e.g. nougat data/calculus00marciala_p43.pdf -o result/nougat
 ```
 
 A path to a directory or to a file where each line is a path to a PDF can also be passed as a positional argument
