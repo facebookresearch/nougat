@@ -4,6 +4,7 @@ Copyright (c) 2022-present NAVER Corp.
 MIT License
 Copyright (c) Meta Platforms, Inc. and affiliates.
 """
+
 import os
 from setuptools import find_packages, setup
 
@@ -43,17 +44,17 @@ setup(
     py_modules=["predict", "app", "train", "test"],
     python_requires=">=3.7",
     install_requires=[
-        "transformers>=4.25.1",
+        "transformers>=4.25.1,<=4.38.2",
         "timm==0.5.4",
         "orjson",
         "opencv-python-headless",
         "datasets[vision]",
         "lightning>=2.0.0,<2022",
         "nltk",
-        "python-Levenshtein",
+        "rapidfuzz",
         "sentencepiece",
         "sconf>=0.2.3",
-        "albumentations>=1.0.0",
+        "albumentations>=1.0.0,<=1.4.24",
         "pypdf>=3.1.0",
         "pypdfium2",
     ],

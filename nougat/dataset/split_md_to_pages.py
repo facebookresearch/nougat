@@ -4,6 +4,7 @@ Copyright (c) Meta Platforms, Inc. and affiliates.
 This source code is licensed under the MIT license found in the
 LICENSE file in the root directory of this source tree.
 """
+
 import argparse
 from collections import Counter
 from copy import deepcopy
@@ -15,7 +16,7 @@ from typing import Dict, List, Tuple, Union, Optional
 import os
 import pypdf
 from unidecode import unidecode
-import Levenshtein
+from rapidfuzz.fuzz import ratio as ratio_perc
 
 import numpy as np
 from sklearn.feature_extraction.text import CountVectorizer
@@ -31,6 +32,10 @@ from nougat.dataset.splitter import (
 from nougat.dataset.utils import unicode_to_latex, remove_pretty_linebreaks
 from nougat.dataset.utils.pdf_text_extract import get_pages, get_paragraphs
 from nougat.dataset.rasterize import rasterize_paper
+
+
+def ratio(*args, **kwargs):
+    return ratio_perc(*args, **kwargs) / 100
 
 
 class BagOfWords:
@@ -419,7 +424,7 @@ def split_markdown(
                 for tex in figure_tex[1]:
                     if f["figType"] == "Table":
                         tex = tex.partition(r"\end{table}")[2]
-                    ratios.append(Levenshtein.ratio(tex, fig_string))
+                    ratios.append(ratio(tex, fig_string))
                 k = np.argmax(ratios)
                 if ratios[k] < 0.8:
                     continue

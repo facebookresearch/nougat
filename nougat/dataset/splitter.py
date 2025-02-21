@@ -4,17 +4,19 @@ Copyright (c) Meta Platforms, Inc. and affiliates.
 This source code is licensed under the MIT license found in the
 LICENSE file in the root directory of this source tree.
 """
-from difflib import SequenceMatcher
-from operator import itemgetter
+
 from typing import List, Tuple, Union
 import re
 import numpy as np
-from Levenshtein.StringMatcher import StringMatcher
-import Levenshtein
+from rapidfuzz.fuzz import ratio as ratio_perc
 from fuzzysearch import find_near_matches
 
 math_start_regex = re.compile(r"(?<!\\)\\[\[\(]", re.M)
 math_end_regex = re.compile(r"(?<!\\)\\[\]\)]", re.M)
+
+
+def ratio(*args, **kwargs):
+    return ratio_perc(*args, **kwargs) / 100
 
 
 def reverse(lst: List[str]) -> List[str]:
@@ -264,10 +266,8 @@ class Splitter:
             last_source = "".join(last_source)[-num_chars_last:]
             matching.append(
                 [
-                    Levenshtein.ratio(first, first_source)
-                    * Levenshtein.ratio(first[:10], first_source[:10]),
-                    Levenshtein.ratio(last, last_source)
-                    * Levenshtein.ratio(last[-10:], last_source[-10:]),
+                    ratio(first, first_source) * ratio(first[:10], first_source[:10]),
+                    ratio(last, last_source) * ratio(last[-10:], last_source[-10:]),
                 ]
             )
         scores = np.asarray(matching).max(0)
@@ -347,28 +347,6 @@ class Splitter:
         start = start + Splitter.count_special_chars(corpus, start)
         return (start, _, end - start), score
 
-    @staticmethod
-    def oldfuzz(corpus, string):
-        res = []
-        for Matcher in [StringMatcher, SequenceMatcher]:
-            m = Matcher(None, corpus, string)
-            blocks = m.get_matching_blocks()
-            scores = []
-            for i, block in enumerate(blocks):
-                m2 = Matcher(
-                    None,
-                    corpus[block[0] : block[0] + max(block[2], len(string))],
-                    string,
-                )
-                r = m2.ratio()
-                if r > 0.995:
-                    return blocks[i], r
-                else:
-                    scores.append(r)
-            ind = np.argmax(scores)
-            res.append((blocks[ind], scores[ind]))
-        return max(res, key=itemgetter(1))
-
     def evaluate_split(self, page_num: int, page_content: str) -> float:
         if page_num > len(self._split_locs) or page_num < 1:
             return 0
@@ -389,5 +367,5 @@ class Splitter:
         doc_content[0] = doc_content[0][start[1] :]
         doc_content[-1] = doc_content[-1][: end[1]]
         doc_content = "".join(doc_content)
-        match = StringMatcher(None, page_content, doc_content).ratio()
+        match = ratio(page_content, doc_content)
         return match
