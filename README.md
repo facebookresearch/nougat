@@ -50,7 +50,7 @@ $ nougat path/to/directory -o output_directory
 
 ```
 usage: nougat [-h] [--batchsize BATCHSIZE] [--checkpoint CHECKPOINT] [--model MODEL] [--out OUT]
-              [--recompute] [--markdown] [--no-skipping] pdf [pdf ...]
+              [--recompute] [--markdown] [--no-skipping] [--device-index DEVICEINDEX] pdf [pdf ...]
 
 positional arguments:
   pdf                   PDF(s) to process.
