@@ -15,6 +15,16 @@ This is the official repository for Nougat, the academic document PDF parser tha
 Project page: https://facebookresearch.github.io/nougat/
 
 ## Install
+From uv:
+
+Install uv
+```
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+Then, install nougat
+```
+uv sync
+```
 
 From pip:
 ```
@@ -40,6 +50,7 @@ To get predictions for a PDF run
 
 ```
 $ nougat path/to/file.pdf -o output_directory
+e.g. nougat data/calculus00marciala_p43.pdf -o result
 ```
 
 A path to a directory or to a file where each line is a path to a PDF can also be passed as a positional argument
