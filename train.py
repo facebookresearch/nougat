@@ -190,7 +190,7 @@ def train(config):
         limit_val_batches=config.val_batches,
         gradient_clip_val=config.gradient_clip_val,
         log_every_n_steps=15,
-        precision="bf16-mixed",
+        precision=config.precision,
         num_sanity_val_steps=0,
         logger=logger,
         callbacks=[

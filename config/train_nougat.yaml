@@ -33,4 +33,5 @@ max_steps: -1
 val_check_interval: null
 check_val_every_n_epoch: 1
 gradient_clip_val: 0.5
+precision: "bf16-mixed"
 verbose: False
