@@ -7,8 +7,9 @@ Copyright (c) Meta Platforms, Inc. and affiliates.
 import logging
 import os
 from math import prod
+import operator
 from pathlib import Path
-from functools import partial
+from functools import partial, reduce
 import random
 from typing import Dict, Tuple, Callable
 from PIL import Image, UnidentifiedImageError
@@ -247,7 +248,13 @@ class NougatDataset(Dataset):
         if sample is None:
             # if sample is broken choose another randomly
             return self[random.randint(0, self.dataset_length - 1)]
-        if sample is None or sample["image"] is None or prod(sample["image"].size) == 0:
+        try:
+            # Python 3.8+
+            is_empty_sample = prod(sample["image"].size) == 0
+        except:
+            # Python 3.7
+            is_empty_sample = reduce(operator.mul, sample["image"].size, 1) == 0
+        if sample is None or sample["image"] is None or is_empty_sample:
             input_tensor = None
         else:
             input_tensor = self.nougat_model.encoder.prepare_input(
