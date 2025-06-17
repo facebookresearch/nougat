@@ -9,7 +9,13 @@ import logging
 
 
 def default_batch_size():
-    if torch.cuda.is_available():
+    if torch.xpu.is_available():
+        batch_size = int(
+            torch.xpu.get_device_properties(0).total_memory / 1024 / 1024 / 1000 * 0.3
+        )
+        if batch_size == 0:
+            logging.warning("GPU VRAM is too small. Computing on CPU.")
+    elif torch.cuda.is_available():
         batch_size = int(
             torch.cuda.get_device_properties(0).total_memory / 1024 / 1024 / 1000 * 0.3
         )
@@ -33,6 +39,8 @@ def move_to_device(model, bf16: bool = True, cuda: bool = True):
         pass
     if bf16:
         model = model.to(torch.bfloat16)
-    if cuda and torch.cuda.is_available():
+    if cuda and torch.xpu.is_available():
+        model = model.to("xpu")
+    elif cuda and torch.cuda.is_available():
         model = model.to("cuda")
     return model
