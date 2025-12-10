@@ -43,12 +43,18 @@ def rasterize_paper(
             pdf = pypdfium2.PdfDocument(pdf)
         if pages is None:
             pages = range(len(pdf))
-        renderer = pdf.render(
-            pypdfium2.PdfBitmap.to_pil,
-            page_indices=pages,
-            scale=dpi / 72,
-        )
-        for i, image in zip(pages, renderer):
+        images = []
+        for idx in pages:
+            page = pdf.get_page(idx)
+
+            pil_image = page.render(
+                scale = dpi / 72,
+                rotation = 0,
+            ).to_pil()
+
+            images.append(pil_image)
+            page.close()
+        for i, image in zip(pages, images):
             if return_pil:
                 page_bytes = io.BytesIO()
                 image.save(page_bytes, "bmp")
