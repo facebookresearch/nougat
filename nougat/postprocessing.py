@@ -427,7 +427,7 @@ def postprocess_single(generation: str, markdown_fix: bool = True) -> str:
 
     if generation.endswith((".", "}")):
         generation += "\n\n"
-    if re.match(r"[A-Z0-9,;:]$", generation):
+    if re.search(r"[A-Z0-9,;:]$", generation):
         # add space in case it there is a comma or word ending
         generation += " "
     elif generation.startswith(("#", "**", "\\begin")):
