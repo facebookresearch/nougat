@@ -1,0 +1,23 @@
+cff-version: 1.2.0
+message: If you use this software, please cite both the article from preferred-citation and the software itself.
+authors:
+  - family-names: Lukas Blecher
+    given-names: Guillem Cucurull
+  - family-names: Thomas Scialom
+    given-names: Robert Stojnic
+title: 'Nougat: Neural Optical Understanding for Academic Documents'
+version: 1.0.0
+date-released: '2023-06-05'
+preferred-citation:
+  authors:
+    - family-names: Lukas Blecher
+      given-names: Guillem Cucurull
+    - family-names: Thomas Scialom
+      given-names: Robert Stojnic
+  title: 'Nougat: Neural Optical Understanding for Academic Documents'
+  type: generic
+  year: '2023'
+  eprint= '2210.03347'
+  archivePrefix='arXiv'
+  primaryClass='cs.CL'
+  url=https://arxiv.org/abs/2210.03347
