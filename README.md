@@ -8,6 +8,8 @@
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Hugging Face Spaces](https://img.shields.io/badge/🤗%20Hugging%20Face-Community%20Space-blue)](https://huggingface.co/spaces/ysharma/nougat)
 
+[English](README.md) | [简体中文](https://github.com/facebookresearch/nougat/blob/main/README.zh.md)
+
 </div>
 
 This is the official repository for Nougat, the academic document PDF parser that understands LaTeX math and tables.
